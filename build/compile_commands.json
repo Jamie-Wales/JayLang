@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/Users/jamie/Dev/jj/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/jamie/Dev/jj/include -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk -fcolor-diagnostics -Wall -Wextra -Wpedantic -o CMakeFiles/jj.dir/src/main.cpp.o -c /Users/jamie/Dev/jj/src/main.cpp",
+  "file": "/Users/jamie/Dev/jj/src/main.cpp",
+  "output": "CMakeFiles/jj.dir/src/main.cpp.o"
+}
+]
