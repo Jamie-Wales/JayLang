@@ -13,5 +13,7 @@ else()
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+add_link_options(-v)
+
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(jj ${SOURCES})
