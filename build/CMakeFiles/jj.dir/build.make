@@ -69,10 +69,66 @@ include CMakeFiles/jj.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/jj.dir/flags.make
 
+CMakeFiles/jj.dir/src/Expression.cpp.o: CMakeFiles/jj.dir/flags.make
+CMakeFiles/jj.dir/src/Expression.cpp.o: /Users/jamie/Dev/jj/src/Expression.cpp
+CMakeFiles/jj.dir/src/Expression.cpp.o: CMakeFiles/jj.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/jj.dir/src/Expression.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/jj.dir/src/Expression.cpp.o -MF CMakeFiles/jj.dir/src/Expression.cpp.o.d -o CMakeFiles/jj.dir/src/Expression.cpp.o -c /Users/jamie/Dev/jj/src/Expression.cpp
+
+CMakeFiles/jj.dir/src/Expression.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/jj.dir/src/Expression.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jamie/Dev/jj/src/Expression.cpp > CMakeFiles/jj.dir/src/Expression.cpp.i
+
+CMakeFiles/jj.dir/src/Expression.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/jj.dir/src/Expression.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jamie/Dev/jj/src/Expression.cpp -o CMakeFiles/jj.dir/src/Expression.cpp.s
+
+CMakeFiles/jj.dir/src/Parser.cpp.o: CMakeFiles/jj.dir/flags.make
+CMakeFiles/jj.dir/src/Parser.cpp.o: /Users/jamie/Dev/jj/src/Parser.cpp
+CMakeFiles/jj.dir/src/Parser.cpp.o: CMakeFiles/jj.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/jj.dir/src/Parser.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/jj.dir/src/Parser.cpp.o -MF CMakeFiles/jj.dir/src/Parser.cpp.o.d -o CMakeFiles/jj.dir/src/Parser.cpp.o -c /Users/jamie/Dev/jj/src/Parser.cpp
+
+CMakeFiles/jj.dir/src/Parser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/jj.dir/src/Parser.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jamie/Dev/jj/src/Parser.cpp > CMakeFiles/jj.dir/src/Parser.cpp.i
+
+CMakeFiles/jj.dir/src/Parser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/jj.dir/src/Parser.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jamie/Dev/jj/src/Parser.cpp -o CMakeFiles/jj.dir/src/Parser.cpp.s
+
+CMakeFiles/jj.dir/src/Scanner.cpp.o: CMakeFiles/jj.dir/flags.make
+CMakeFiles/jj.dir/src/Scanner.cpp.o: /Users/jamie/Dev/jj/src/Scanner.cpp
+CMakeFiles/jj.dir/src/Scanner.cpp.o: CMakeFiles/jj.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/jj.dir/src/Scanner.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/jj.dir/src/Scanner.cpp.o -MF CMakeFiles/jj.dir/src/Scanner.cpp.o.d -o CMakeFiles/jj.dir/src/Scanner.cpp.o -c /Users/jamie/Dev/jj/src/Scanner.cpp
+
+CMakeFiles/jj.dir/src/Scanner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/jj.dir/src/Scanner.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jamie/Dev/jj/src/Scanner.cpp > CMakeFiles/jj.dir/src/Scanner.cpp.i
+
+CMakeFiles/jj.dir/src/Scanner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/jj.dir/src/Scanner.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jamie/Dev/jj/src/Scanner.cpp -o CMakeFiles/jj.dir/src/Scanner.cpp.s
+
+CMakeFiles/jj.dir/src/Token.cpp.o: CMakeFiles/jj.dir/flags.make
+CMakeFiles/jj.dir/src/Token.cpp.o: /Users/jamie/Dev/jj/src/Token.cpp
+CMakeFiles/jj.dir/src/Token.cpp.o: CMakeFiles/jj.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/jj.dir/src/Token.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/jj.dir/src/Token.cpp.o -MF CMakeFiles/jj.dir/src/Token.cpp.o.d -o CMakeFiles/jj.dir/src/Token.cpp.o -c /Users/jamie/Dev/jj/src/Token.cpp
+
+CMakeFiles/jj.dir/src/Token.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/jj.dir/src/Token.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jamie/Dev/jj/src/Token.cpp > CMakeFiles/jj.dir/src/Token.cpp.i
+
+CMakeFiles/jj.dir/src/Token.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/jj.dir/src/Token.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jamie/Dev/jj/src/Token.cpp -o CMakeFiles/jj.dir/src/Token.cpp.s
+
 CMakeFiles/jj.dir/src/main.cpp.o: CMakeFiles/jj.dir/flags.make
 CMakeFiles/jj.dir/src/main.cpp.o: /Users/jamie/Dev/jj/src/main.cpp
 CMakeFiles/jj.dir/src/main.cpp.o: CMakeFiles/jj.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/jj.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/jj.dir/src/main.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/jj.dir/src/main.cpp.o -MF CMakeFiles/jj.dir/src/main.cpp.o.d -o CMakeFiles/jj.dir/src/main.cpp.o -c /Users/jamie/Dev/jj/src/main.cpp
 
 CMakeFiles/jj.dir/src/main.cpp.i: cmake_force
@@ -85,15 +141,23 @@ CMakeFiles/jj.dir/src/main.cpp.s: cmake_force
 
 # Object files for target jj
 jj_OBJECTS = \
+"CMakeFiles/jj.dir/src/Expression.cpp.o" \
+"CMakeFiles/jj.dir/src/Parser.cpp.o" \
+"CMakeFiles/jj.dir/src/Scanner.cpp.o" \
+"CMakeFiles/jj.dir/src/Token.cpp.o" \
 "CMakeFiles/jj.dir/src/main.cpp.o"
 
 # External object files for target jj
 jj_EXTERNAL_OBJECTS =
 
+jj: CMakeFiles/jj.dir/src/Expression.cpp.o
+jj: CMakeFiles/jj.dir/src/Parser.cpp.o
+jj: CMakeFiles/jj.dir/src/Scanner.cpp.o
+jj: CMakeFiles/jj.dir/src/Token.cpp.o
 jj: CMakeFiles/jj.dir/src/main.cpp.o
 jj: CMakeFiles/jj.dir/build.make
 jj: CMakeFiles/jj.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable jj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/jamie/Dev/jj/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable jj"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/jj.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

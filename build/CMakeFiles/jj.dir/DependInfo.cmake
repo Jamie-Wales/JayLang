@@ -8,6 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Users/jamie/Dev/jj/src/Expression.cpp" "CMakeFiles/jj.dir/src/Expression.cpp.o" "gcc" "CMakeFiles/jj.dir/src/Expression.cpp.o.d"
+  "/Users/jamie/Dev/jj/src/Parser.cpp" "CMakeFiles/jj.dir/src/Parser.cpp.o" "gcc" "CMakeFiles/jj.dir/src/Parser.cpp.o.d"
+  "/Users/jamie/Dev/jj/src/Scanner.cpp" "CMakeFiles/jj.dir/src/Scanner.cpp.o" "gcc" "CMakeFiles/jj.dir/src/Scanner.cpp.o.d"
+  "/Users/jamie/Dev/jj/src/Token.cpp" "CMakeFiles/jj.dir/src/Token.cpp.o" "gcc" "CMakeFiles/jj.dir/src/Token.cpp.o.d"
   "/Users/jamie/Dev/jj/src/main.cpp" "CMakeFiles/jj.dir/src/main.cpp.o" "gcc" "CMakeFiles/jj.dir/src/main.cpp.o.d"
   )
 

@@ -129,6 +129,102 @@ jj/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/build
 .PHONY : jj/fast
 
+src/Expression.o: src/Expression.cpp.o
+.PHONY : src/Expression.o
+
+# target to build an object file
+src/Expression.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Expression.cpp.o
+.PHONY : src/Expression.cpp.o
+
+src/Expression.i: src/Expression.cpp.i
+.PHONY : src/Expression.i
+
+# target to preprocess a source file
+src/Expression.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Expression.cpp.i
+.PHONY : src/Expression.cpp.i
+
+src/Expression.s: src/Expression.cpp.s
+.PHONY : src/Expression.s
+
+# target to generate assembly for a file
+src/Expression.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Expression.cpp.s
+.PHONY : src/Expression.cpp.s
+
+src/Parser.o: src/Parser.cpp.o
+.PHONY : src/Parser.o
+
+# target to build an object file
+src/Parser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Parser.cpp.o
+.PHONY : src/Parser.cpp.o
+
+src/Parser.i: src/Parser.cpp.i
+.PHONY : src/Parser.i
+
+# target to preprocess a source file
+src/Parser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Parser.cpp.i
+.PHONY : src/Parser.cpp.i
+
+src/Parser.s: src/Parser.cpp.s
+.PHONY : src/Parser.s
+
+# target to generate assembly for a file
+src/Parser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Parser.cpp.s
+.PHONY : src/Parser.cpp.s
+
+src/Scanner.o: src/Scanner.cpp.o
+.PHONY : src/Scanner.o
+
+# target to build an object file
+src/Scanner.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Scanner.cpp.o
+.PHONY : src/Scanner.cpp.o
+
+src/Scanner.i: src/Scanner.cpp.i
+.PHONY : src/Scanner.i
+
+# target to preprocess a source file
+src/Scanner.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Scanner.cpp.i
+.PHONY : src/Scanner.cpp.i
+
+src/Scanner.s: src/Scanner.cpp.s
+.PHONY : src/Scanner.s
+
+# target to generate assembly for a file
+src/Scanner.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Scanner.cpp.s
+.PHONY : src/Scanner.cpp.s
+
+src/Token.o: src/Token.cpp.o
+.PHONY : src/Token.o
+
+# target to build an object file
+src/Token.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Token.cpp.o
+.PHONY : src/Token.cpp.o
+
+src/Token.i: src/Token.cpp.i
+.PHONY : src/Token.i
+
+# target to preprocess a source file
+src/Token.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Token.cpp.i
+.PHONY : src/Token.cpp.i
+
+src/Token.s: src/Token.cpp.s
+.PHONY : src/Token.s
+
+# target to generate assembly for a file
+src/Token.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/jj.dir/build.make CMakeFiles/jj.dir/src/Token.cpp.s
+.PHONY : src/Token.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -162,6 +258,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... jj"
+	@echo "... src/Expression.o"
+	@echo "... src/Expression.i"
+	@echo "... src/Expression.s"
+	@echo "... src/Parser.o"
+	@echo "... src/Parser.i"
+	@echo "... src/Parser.s"
+	@echo "... src/Scanner.o"
+	@echo "... src/Scanner.i"
+	@echo "... src/Scanner.s"
+	@echo "... src/Token.o"
+	@echo "... src/Token.i"
+	@echo "... src/Token.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
