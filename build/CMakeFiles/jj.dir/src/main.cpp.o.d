@@ -1,6 +1,6 @@
 CMakeFiles/jj.dir/src/main.cpp.o: /Users/jamie/Dev/jj/src/main.cpp \
-  /Users/jamie/Dev/jj/include/Parser.h \
-  /Users/jamie/Dev/jj/include/ErrorHandler.h \
+  /Users/jamie/Dev/jj/include/Expression.h \
+  /Users/jamie/Dev/jj/include/Token.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__assert \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__config \
@@ -792,9 +792,9 @@ CMakeFiles/jj.dir/src/main.cpp.o: /Users/jamie/Dev/jj/src/main.cpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/_types/_nl_item.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__bsd_locale_defaults.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/cstdarg \
-  /Users/jamie/Dev/jj/include/Expression.h \
-  /Users/jamie/Dev/jj/include/Token.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/sstream \
+  /Users/jamie/Dev/jj/include/Parser.h \
+  /Users/jamie/Dev/jj/include/ErrorHandler.h \
   /Users/jamie/Dev/jj/include/ParserError.h \
   /Users/jamie/Dev/jj/include/Scanner.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/fstream \

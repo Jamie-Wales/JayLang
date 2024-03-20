@@ -2,8 +2,8 @@
 #define INCLUDE_INCLUDE_EXPRESSION_H_
 
 #include "Token.h"
-#include <memory>
 #include <iostream>
+#include <memory>
 enum class ExprType {
     LITERAL,
     UNARY,
@@ -71,6 +71,5 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& os, const Expr& expr);
-
 
 #endif // INCLUDE_INCLUDE_EXPRESSION_H_

@@ -1,3 +1,4 @@
+#include "Expression.h"
 #include "Parser.h"
 #include "Scanner.h"
 #include <fstream>
@@ -5,8 +6,6 @@
 #include <memory>
 #include <ostream>
 #include <string>
-#include "Expression.h"
-#include <utility>
 #define BUFFERSIZE 2048
 
 void runfile(char* path)
@@ -30,8 +29,9 @@ void runPrompt()
         std::getline(std::cin, line);
         Scanner scan { line };
         std::vector<Token> tokens = scan.scanTokens();
-        for (const Token& t : tokens)
-            std::cout << t.toString();
+        Parser parser { tokens };
+        auto expr = parser.parse();
+        std::cout << *expr << std::endl;
     }
 }
 
