@@ -2,6 +2,7 @@
 #define INCLUDE_INCLUDE_EXPRESSION_H_
 
 #include "Token.h"
+#include <exception>
 #include <iostream>
 #include <memory>
 enum class ExprType {
@@ -47,7 +48,7 @@ struct Function {
 };
 
 struct Literal {
-    const ::LiteralType type;
+    const LiteralType type;
     const std::shared_ptr<void> value;
 };
 

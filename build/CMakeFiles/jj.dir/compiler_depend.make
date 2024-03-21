@@ -1592,8 +1592,8 @@ CMakeFiles/jj.dir/src/Parser.cpp.o: /Users/jamie/Dev/jj/src/Parser.cpp \
   /Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include/stdint.h \
   /Users/jamie/Dev/jj/include/ErrorHandler.h \
   /Users/jamie/Dev/jj/include/Expression.h \
+  /Users/jamie/Dev/jj/include/ParseError.h \
   /Users/jamie/Dev/jj/include/Parser.h \
-  /Users/jamie/Dev/jj/include/ParserError.h \
   /Users/jamie/Dev/jj/include/Token.h
 
 CMakeFiles/jj.dir/src/Scanner.cpp.o: /Users/jamie/Dev/jj/src/Scanner.cpp \
@@ -4002,8 +4002,8 @@ CMakeFiles/jj.dir/src/main.cpp.o: /Users/jamie/Dev/jj/src/main.cpp \
   /Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include/stdint.h \
   /Users/jamie/Dev/jj/include/ErrorHandler.h \
   /Users/jamie/Dev/jj/include/Expression.h \
+  /Users/jamie/Dev/jj/include/ParseError.h \
   /Users/jamie/Dev/jj/include/Parser.h \
-  /Users/jamie/Dev/jj/include/ParserError.h \
   /Users/jamie/Dev/jj/include/Scanner.h \
   /Users/jamie/Dev/jj/include/Token.h
 
@@ -4820,6 +4820,8 @@ CMakeFiles/jj.dir/src/main.cpp.o: /Users/jamie/Dev/jj/src/main.cpp \
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/mach/arm/_structs.h:
 
+/Users/jamie/Dev/jj/include/ParseError.h:
+
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/cerrno:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__functional/mem_fun_ref.h:
@@ -5257,8 +5259,6 @@ CMakeFiles/jj.dir/src/main.cpp.o: /Users/jamie/Dev/jj/src/main.cpp \
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__algorithm/ranges_move_backward.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__utility/priority_tag.h:
-
-/Users/jamie/Dev/jj/include/ParserError.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk/usr/include/_ctermid.h:
 

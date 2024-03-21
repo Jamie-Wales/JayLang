@@ -1,12 +1,10 @@
 #ifndef INCLUDE_INCLUDE_PARSER_H_
 #define INCLUDE_INCLUDE_PARSER_H_
 #include "ErrorHandler.h"
+#include "ParseError.h"
+#include "Token.h"
 #include <Expression.h>
 #include <Token.h>
-#include <memory>
-
-#include "ParserError.h"
-#include "Token.h"
 #include <memory>
 
 class Parser {
@@ -16,7 +14,9 @@ public:
     std::shared_ptr<Expr> parse();
     ErrorHandler err = {};
     size_t current = 0;
+
 private:
+    ParseError error(Token& token, const std::string& message);
     std::vector<Token> tokens;
     std::shared_ptr<Expr> expression();
     std::shared_ptr<Expr> equality();
@@ -25,6 +25,8 @@ private:
     std::shared_ptr<Expr> factor();
     std::shared_ptr<Expr> unary();
     std::shared_ptr<Expr> primary();
+    std::shared_ptr<Expr> comma();
+    std::shared_ptr<Expr> terniary();
 
     bool match(const std::initializer_list<TokenType>& types);
     Token& peek();

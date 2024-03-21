@@ -4,8 +4,9 @@ std::shared_ptr<Expr> Parser::parse()
 {
     try {
         return expression();
-    } catch (ParseError error) {
-        err.error = true;
+    } catch (ParseError& error) {
+        err.handlerError(peek().line, error.what());
+        synchronize();
         return nullptr;
     }
 };
@@ -14,6 +15,11 @@ std::shared_ptr<Expr> Parser::expression()
 {
     return equality();
 };
+
+std::shared_ptr<Expr> Parser::comma() {};
+
+std::shared_ptr<Expr>
+Parser::terniary() {};
 
 std::shared_ptr<Expr> Parser::equality()
 {
@@ -97,6 +103,7 @@ std::shared_ptr<Expr> Parser::primary()
         consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
         return std::make_shared<Expr>(ExprType::GROUPING, Grouping { expr });
     };
+    throw ParseError { peek(), "unexpected expression" };
 };
 bool Parser::match(const std::initializer_list<TokenType>& types)
 {
@@ -117,8 +124,14 @@ Token& Parser::consume(TokenType type, const std::string& message)
 {
     if (check(type))
         return advance();
-    throw ParseError(peek(), message);
+    throw error(peek(), message);
 }
+
+ParseError Parser::error(Token& token, const std::string& message)
+{
+    err.handlerError(token.line, message);
+    return ParseError(token, message);
+};
 
 bool Parser::check(TokenType type)
 {
