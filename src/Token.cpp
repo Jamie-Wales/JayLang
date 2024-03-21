@@ -84,6 +84,10 @@ std::string Token::typeToString() const
         return "WHILE";
     case TokenType::ENDOFFILE:
         return "ENDOFFILE";
+    case TokenType::QUESTION_MARK:
+        return "QUESTION_MARK";
+    case TokenType::COLON:
+        return "COLON";
     default:
         return "UNKNOWN";
     }

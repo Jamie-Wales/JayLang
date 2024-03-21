@@ -1,4 +1,0 @@
-/Users/jamie/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /Users/jamie/Dev/jj -B /Users/jamie/Dev/jj/build
--- Configuring done (0.0s)
--- Generating done (0.0s)
--- Build files have been written to: /Users/jamie/Dev/jj/build

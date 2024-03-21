@@ -9,6 +9,7 @@ enum class ExprType {
     LITERAL,
     UNARY,
     BINARY,
+    TERNARY,
     GROUPING,
 };
 
@@ -24,7 +25,7 @@ class Expr;
 
 struct Binary {
     std::shared_ptr<Expr> left;
-    const Token opr;
+    const Token& opr;
     std::shared_ptr<Expr> right;
 };
 
@@ -36,34 +37,33 @@ struct Assign {
     const Token name;
     std::unique_ptr<Expr> value;
 };
-
+struct Ternary {
+    std::shared_ptr<Expr> condition;
+    std::shared_ptr<Expr> trueBranch;
+    std::shared_ptr<Expr> falseBranch;
+};
 struct Unary {
-    const Token opr;
+    const Token& opr;
     std::shared_ptr<Expr> value;
 };
 
 struct Function {
-    const Token name;
+    const Token& name;
     const std::vector<std::shared_ptr<Expr>> params;
 };
 
 struct Literal {
-    const LiteralType type;
+    const LiteralType& type;
     const std::shared_ptr<void> value;
 };
 
 class Expr {
 public:
     ExprType type;
-    std::variant<Unary,
-        Binary, Assign, Grouping, Literal>
-        content;
-
-    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal> content)
-
+    std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary> content;
+    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary> content)
         : type(type)
         , content(std::move(content)) {};
-
     Expr(Expr& expression)
         : type { expression.type }
         , content { std::move(expression.content) } {};

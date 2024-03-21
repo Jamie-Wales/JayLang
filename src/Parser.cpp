@@ -1,4 +1,7 @@
 #include "Parser.h"
+#include "Expression.h"
+#include "Token.h"
+#include <memory>
 
 std::shared_ptr<Expr> Parser::parse()
 {
@@ -13,13 +16,34 @@ std::shared_ptr<Expr> Parser::parse()
 
 std::shared_ptr<Expr> Parser::expression()
 {
-    return equality();
+    return comma();
 };
 
-std::shared_ptr<Expr> Parser::comma() {};
+std::shared_ptr<Expr> Parser::comma()
+{
+    auto expr = ternary();
+    while (match({ TokenType::COMMA })) {
+        auto opr = previous();
+        auto right = ternary();
+        expr = std::make_shared<Expr>(ExprType::BINARY, Binary { expr, opr, right });
+    };
 
-std::shared_ptr<Expr>
-Parser::terniary() {};
+    return expr;
+};
+
+std::shared_ptr<Expr> Parser::ternary()
+{
+    auto condition = equality();
+    if (match({ TokenType::QUESTION_MARK })) {
+        auto oper = previous();
+        auto trueBranch = equality();
+        consume(TokenType::COLON, "Expect ':' after expression.");
+        auto falseBranch = equality();
+        return std::make_shared<Expr>(ExprType::TERNARY, Ternary { condition, trueBranch, falseBranch });
+    }
+
+    return condition;
+}
 
 std::shared_ptr<Expr> Parser::equality()
 {

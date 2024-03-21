@@ -1,4 +1,5 @@
 #include "Scanner.h"
+#include "Token.h"
 char Scanner::peek()
 {
     if (isAtEnd())
@@ -100,7 +101,7 @@ char Scanner::advance()
 
 void Scanner::addToken(TokenType token, std::shared_ptr<void> literal)
 {
-    std::string text = source.substr(start, current-start);
+    std::string text = source.substr(start, current - start);
     tokens.emplace_back(token, text, literal, static_cast<int>(line));
 }
 
@@ -155,6 +156,12 @@ void Scanner::scanToken()
     case '>':
         addToken(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
         break;
+    case '?':
+        addToken(TokenType::QUESTION_MARK);
+        break;
+    case ':':
+        addToken(TokenType::COLON);
+        break;
     case '/':
         if (match('/')) {
             while (peek() != '\n' && !isAtEnd())
@@ -185,7 +192,7 @@ void Scanner::scanToken()
                 advance();
 
             TokenType type = TokenType::NONE;
-            std::string output = source.substr(start, current-start);
+            std::string output = source.substr(start, current - start);
             try {
                 type = keywords.at(output);
                 addToken(type);

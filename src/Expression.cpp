@@ -15,13 +15,17 @@ std::ostream& operator<<(std::ostream& os, const Expr& expr)
         const Unary un = std::get<Unary>(expr.content);
         os << "(" << un.opr.getLexeme() << " " << *un.value << ")";
     } break;
-case ExprType::BINARY: {
-    const Binary bi = std::get<Binary>(expr.content);
-    os << "(" << bi.opr.getLexeme() << " " << *bi.left << " " << *bi.right << ")";
-} break;
+    case ExprType::BINARY: {
+        const Binary bi = std::get<Binary>(expr.content);
+        os << "(" << bi.opr.getLexeme() << " " << *bi.left << " " << *bi.right << ")";
+    } break;
     case ExprType::GROUPING: {
         const Grouping gr = std::get<Grouping>(expr.content);
         os << "(" << *gr.expression << ")";
+    } break;
+    case ExprType::TERNARY: {
+        const Ternary gr = std::get<Ternary>(expr.content);
+        os << "(" << *gr.condition << " ? " << *gr.trueBranch << " : " << *gr.falseBranch << ")";
     } break;
     }
 

@@ -26,7 +26,7 @@ private:
     std::shared_ptr<Expr> unary();
     std::shared_ptr<Expr> primary();
     std::shared_ptr<Expr> comma();
-    std::shared_ptr<Expr> terniary();
+    std::shared_ptr<Expr> ternary();
 
     bool match(const std::initializer_list<TokenType>& types);
     Token& peek();

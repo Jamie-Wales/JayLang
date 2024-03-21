@@ -26,6 +26,8 @@ enum class TokenType {
     GREATER_EQUAL,
     LESS,
     LESS_EQUAL,
+    QUESTION_MARK,
+    COLON,
 
     // Literals.
     IDENTIFIER,
