@@ -2,10 +2,43 @@
 #include "Linker.h"
 #include "Parser.h"
 #include "Scanner.h"
+#include "jni.h"
+#include <cstdlib>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
+JNIEnv* create_vm(JavaVM** jvm)
+{
+    JNIEnv* env;
+    JavaVMInitArgs vm_args;
+    JavaVMOption options;
+    options.optionString = "-Djava.class.path=.";
+    vm_args.version = JNI_VERSION_1_8;
+    vm_args.nOptions = 1;
+    vm_args.options = &options;
+    vm_args.ignoreUnrecognized = 0;
+
+    int ret = JNI_CreateJavaVM(jvm, (void**)&env, &vm_args);
+    if (ret < 0)
+        std::cerr << "Unable to Launch JVM\n";
+    return env;
+}
+void runJavaMethod(JNIEnv* env)
+{
+    jclass clazz = env->FindClass("Example");
+    if (clazz == nullptr) {
+        std::cerr << "Failed to find the class\n";
+        return;
+    }
+
+    jmethodID mid = env->GetStaticMethodID(clazz, "main", "([Ljava/lang/String;)V");
+    if (mid == nullptr) {
+        std::cerr << "Failed to find the static method\n";
+        return;
+    }
+    env->CallStaticVoidMethod(clazz, mid);
+}
 
 void runfile(char* path)
 {
@@ -20,19 +53,17 @@ void runfile(char* path)
             return;
         Compiler compiler {};
         writeToFile(compiler.generateAssembly(*parse), "./example.j");
+        JavaVM* jni;
+        JNIEnv* env = create_vm(&jni);
+
         std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ ./example.j";
         if (system(compileCommand.c_str()) != 0) {
             std::cerr << "Compilation failed.\n";
             return;
         }
-
-        std::string runCommand = "java Example";
-        if (system(runCommand.c_str()) != 0) {
-            std::cerr << "Java program execution failed.\n";
-            return;
-        }
-
-        exit(EXIT_FAILURE); // Consider revising this to appropriate program logic
+        runJavaMethod(env);
+        jni->DestroyJavaVM();
+        exit(EXIT_SUCCESS);
     } else {
         std::cerr << "Failed to open input file: " << path << '\n';
     }
