@@ -46,8 +46,7 @@ void Scanner::number()
     }
 
     double output = stod(source.substr(start, current));
-    auto ptr = std::make_shared<double>(output);
-    addToken(TokenType::NUMBER, ptr);
+    addToken(TokenType::NUMBER, output);
 }
 
 void Scanner::string()
@@ -66,9 +65,7 @@ void Scanner::string()
 
     advance();
     std::string output = source.substr(start, current - start);
-
-    auto shared = std::make_shared<std::string>(output);
-    addToken(TokenType::STRING, shared);
+    addToken(TokenType::STRING, output);
 }
 
 void Scanner::comment()
@@ -99,7 +96,7 @@ char Scanner::advance()
     return source.at(current++);
 }
 
-void Scanner::addToken(TokenType token, std::shared_ptr<void> literal)
+void Scanner::addToken(TokenType token, std::variant<double, std::string, bool, nullptr_t> literal)
 {
     std::string text = source.substr(start, current - start);
     tokens.emplace_back(token, text, literal, static_cast<int>(line));

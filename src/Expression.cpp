@@ -1,33 +1,31 @@
 #include "Expression.h"
 
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
 std::ostream& operator<<(std::ostream& os, const Expr& expr)
 {
-    switch (expr.type) {
-    case ExprType::LITERAL: {
-        Literal l = std::get<Literal>(expr.content);
-        if (l.type == LiteralType::NUMBER) {
-            os << std::to_string(*std::static_pointer_cast<double>(l.value));
-        } else {
-            os << *std::static_pointer_cast<std::string>(l.value);
-        }
-    } break;
-    case ExprType::UNARY: {
-        const Unary un = std::get<Unary>(expr.content);
-        os << "(" << un.opr.getLexeme() << " " << *un.value << ")";
-    } break;
-    case ExprType::BINARY: {
-        const Binary bi = std::get<Binary>(expr.content);
-        os << "(" << bi.opr.getLexeme() << " " << *bi.left << " " << *bi.right << ")";
-    } break;
-    case ExprType::GROUPING: {
-        const Grouping gr = std::get<Grouping>(expr.content);
-        os << "(" << *gr.expression << ")";
-    } break;
-    case ExprType::TERNARY: {
-        const Ternary gr = std::get<Ternary>(expr.content);
-        os << "(" << *gr.condition << " ? " << *gr.trueBranch << " : " << *gr.falseBranch << ")";
-    } break;
-    }
+    std::visit(overloaded {
+                   [&](const Binary& b) { os << "(" << b.opr.getLexeme() << " " << *b.left << " " << *b.right << ")"; },
+                   [&](const Unary& u) { os << "(" << u.opr.getLexeme() << " " << *u.value << ")"; },
+                   [&](const Grouping& g) { os << "(" << *g.expression << ")"; },
+                   [&](const Literal& l) {
+                       std::visit(overloaded {
+                                      [&](const std::string& s) { os << '"' << s << '"'; },
+                                      [&](double d) { os << d; },
+                                      [&](bool b) { os << (b ? "true" : "false"); },
+                                      [&](auto&) { os << "unknown"; } // Handle other types, or unknown ones.
+                                  },
+                           l.literal);
+                   },
+                   [&](const Ternary& t) { os << "(" << *t.condition << " ? " << *t.left << " : " << *t.right << ")"; },
+                   [&](auto&) { os << "unknown expr type"; } // Catch-all for any other types.
+               },
+        expr.content);
 
     return os;
-};
+}

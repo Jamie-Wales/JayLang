@@ -113,15 +113,15 @@ std::shared_ptr<Expr> Parser::unary()
 std::shared_ptr<Expr> Parser::primary()
 {
     if (match({ TokenType::FALSE }))
-        return std::make_shared<Expr>(ExprType::LITERAL, Literal { LiteralType::BOOLEAN, std::static_pointer_cast<void>(std::make_shared<std::string>("FALSE")) });
+        return std::make_shared<Expr>(ExprType::LITERAL, Literal { true });
     if (match({ TokenType::TRUE }))
-        return std::make_shared<Expr>(ExprType::LITERAL, Literal { LiteralType::BOOLEAN, std::static_pointer_cast<void>(std::make_shared<std::string>("TRUE")) });
+        return std::make_shared<Expr>(ExprType::LITERAL, Literal { false });
     if (match({ TokenType::NIL }))
-        return std::make_shared<Expr>(ExprType::LITERAL, Literal { LiteralType::BOOLEAN, std::static_pointer_cast<void>(std::make_shared<std::string>("NIL")) });
+        return std::make_shared<Expr>(ExprType::LITERAL, Literal { nullptr });
     if (match({ TokenType::NUMBER }))
-        return std::make_shared<Expr>(ExprType::LITERAL, Literal { LiteralType::NUMBER, previous().literal });
+        return std::make_shared<Expr>(ExprType::LITERAL, Literal { previous().literal });
     if (match({ TokenType::STRING }))
-        return std::make_shared<Expr>(ExprType::LITERAL, Literal { LiteralType::STRING, previous().literal });
+        return std::make_shared<Expr>(ExprType::LITERAL, Literal { previous().literal });
     if (match({ TokenType::LEFT_PAREN })) {
         auto expr = expression();
         consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");

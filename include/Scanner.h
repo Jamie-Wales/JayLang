@@ -53,7 +53,7 @@ private:
     void string();
     void comment();
     char advance();
-    void addToken(TokenType token, std::shared_ptr<void> literal);
+    void addToken(TokenType token, std::variant<double, std::string, bool, nullptr_t> literal);
     void addToken(TokenType token);
     void scanToken();
 

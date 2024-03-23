@@ -1,4 +1,9 @@
 #include "Token.h"
+#include <cstddef>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <variant>
 std::string Token::getLexeme() const
 {
     return this->lexeme;
@@ -86,8 +91,6 @@ std::string Token::typeToString() const
         return "ENDOFFILE";
     case TokenType::QUESTION_MARK:
         return "QUESTION_MARK";
-    case TokenType::COLON:
-        return "COLON";
     default:
         return "UNKNOWN";
     }
@@ -97,16 +100,19 @@ std::string Token::toString() const
 {
     std::stringstream ss;
     ss << "TYPE:" << typeToString() << " LEXEME:" << lexeme << " LINE:" << line;
-
-    // Check and append the literal value if it exists
-    if (literal != nullptr) {
-        if (type == TokenType::STRING) {
-            ss << " LITERAL:\"" << *std::static_pointer_cast<std::string>(literal) << "\"";
-        } else if (type == TokenType::NUMBER) {
-            ss << " LITERAL:" << *std::static_pointer_cast<double>(literal);
-        }
+    if (type == TokenType::STRING) {
+        const std::string str = std::get<std::string>(literal);
+        ss << " LITERAL: " << str;
+    } else if (type == TokenType::NUMBER) {
+        const double db = std::get<double>(literal);
+        ss << "NUMBER:" << db;
     }
-
     ss << std::endl;
     return ss.str();
 }
+
+Token::Token(TokenType type, std::string lexeme, const std::variant<double, std::string, bool, nullptr_t> literal, int line)
+    : lexeme(std::move(lexeme))
+    , line(line)
+    , type(type)
+    , literal(std::move(literal)) {};

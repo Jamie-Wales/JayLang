@@ -1,3 +1,5 @@
+#include "Compiler.h"
+#include "Linker.h"
 #include "Parser.h"
 #include "Scanner.h"
 #include <fstream>
@@ -16,9 +18,25 @@ void runfile(char* path)
         auto parse = parser.parse();
         if (parser.err.error || parse == nullptr)
             return;
-        std::cout << *parse << std::endl;
-        exit(EXIT_FAILURE);
+        Compiler compiler {};
+        writeToFile(compiler.generateAssembly(*parse), "./example.j");
+        std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ ./example.j";
+        if (system(compileCommand.c_str()) != 0) {
+            std::cerr << "Compilation failed.\n";
+            return;
+        }
+
+        std::string runCommand = "java Example";
+        if (system(runCommand.c_str()) != 0) {
+            std::cerr << "Java program execution failed.\n";
+            return;
+        }
+
+        exit(EXIT_FAILURE); // Consider revising this to appropriate program logic
+    } else {
+        std::cerr << "Failed to open input file: " << path << '\n';
     }
+    exit(EXIT_FAILURE);
 }
 
 void runPrompt()
