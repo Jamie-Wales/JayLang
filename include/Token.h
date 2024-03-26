@@ -1,11 +1,9 @@
 #ifndef INCLUDE_INCLUDE_TOKEN_H_
 #define INCLUDE_INCLUDE_TOKEN_H_
 #include <cstddef>
-#include <optional>
 #include <string>
 #include <variant>
 enum class TokenType {
-    // Single-character tokens.
     LEFT_PAREN,
     RIGHT_PAREN,
     LEFT_BRACE,
@@ -18,7 +16,6 @@ enum class TokenType {
     SLASH,
     STAR,
 
-    // One or two character tokens.
     BANG,
     BANG_EQUAL,
     EQUAL,
@@ -30,12 +27,10 @@ enum class TokenType {
     QUESTION_MARK,
     COLON,
 
-    // Literals.
     IDENTIFIER,
     STRING,
     NUMBER,
 
-    // Keywords.
     AND,
     CLASS,
     ELSE,

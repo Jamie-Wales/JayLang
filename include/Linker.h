@@ -14,13 +14,14 @@ void writeToFile(const AssemblyInfo& assemblyInfo, const std::string& filename)
     file << ".class public Example\n"
          << ".super java/lang/Object\n"
          << ".method public static main : ([Ljava/lang/String;)V\n"
-         << "  .limit stack " << assemblyInfo.maxStackDepth * 5 << "\n"
-         << "  .limit locals 10\n"
+         << ".code stack " << 100 << " locals 10\n"
          << "    getstatic java/lang/System/out Ljava/io/PrintStream;\n"
          << "    " << assemblyInfo.code << "\n"
-         << "    invokevirtual java/io/PrintStream/println(D)V\n"
+         << "    invokevirtual java/io/PrintStream/println (D)V\n"
          << "    return\n"
-         << ".end method";
+         << ".end code\n"
+         << ".end method\n"
+         << ".end class\n";
 
     file.close();
 }

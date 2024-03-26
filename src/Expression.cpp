@@ -28,4 +28,28 @@ std::ostream& operator<<(std::ostream& os, const Expr& expr)
         expr.content);
 
     return os;
+};
+
+std::string getLiteralType(const Expr& expr)
+{
+    if (expr.type != ExprType::LITERAL) {
+        return "Not a Literal";
+    }
+
+    const auto& lit = std::get<Literal>(expr.content);
+    return std::visit([](auto&& arg) -> std::string {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, double>) {
+            return "double";
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            return "string";
+        } else if constexpr (std::is_same_v<T, bool>) {
+            return "bool";
+        } else if constexpr (std::is_same_v<T, nullptr_t>) {
+            return "nullptr";
+        } else {
+            return "unknown";
+        }
+    },
+        lit.literal);
 }
