@@ -17,7 +17,7 @@ void writeToFile(const AssemblyInfo& assemblyInfo, const std::string& filename)
          << ".code stack " << 100 << " locals 10\n"
          << "    getstatic java/lang/System/out Ljava/io/PrintStream;\n"
          << "    " << assemblyInfo.code << "\n"
-         << "    invokevirtual java/io/PrintStream/println (D)V\n"
+         << "    invokevirtual java/io/PrintStream/println (Ljava/lang/String;)V\n"
          << "    return\n"
          << ".end code\n"
          << ".end method\n"

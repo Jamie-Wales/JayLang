@@ -2,6 +2,7 @@
 #define INCLUDE_COMPILER_H
 
 #include "Expression.h"
+#include "Token.h"
 #include <cstddef>
 #include <string>
 #include <variant>
@@ -36,53 +37,6 @@ public:
     AssemblyInfo generateAssembly(const Expr& expr)
     {
         return std::visit(overloaded {
-                              [&](Grouping g) -> AssemblyInfo {
-                                  auto info = generateAssembly(*g.expression);
-                                  return info;
-                              },
-                              [&](const Unary& u) -> AssemblyInfo {
-                                  auto info = generateAssembly(*u.value);
-                                  info.code += "ineg\n";
-                                  return info;
-                              },
-                              [&](const Binary& b) -> AssemblyInfo {
-                                  auto leftInfo = generateAssembly(*b.left);
-                                  auto rightInfo = generateAssembly(*b.right);
-
-                                  AssemblyInfo info;
-                                  info.code = leftInfo.code + rightInfo.code;
-                                  if (leftInfo.type == AssemblyInfo::Type::DOUBLE || rightInfo.type == AssemblyInfo::Type::DOUBLE) {
-                                      if (b.opr.type == TokenType::PLUS) {
-                                          info.code += "dadd\n";
-                                      } else if (b.opr.type == TokenType::MINUS) {
-                                          info.code += "dsub\n";
-                                      } else if (b.opr.type == TokenType::STAR) {
-                                          info.code += "dmul\n";
-                                      } else if (b.opr.type == TokenType::SLASH) {
-                                          info.code += "ddiv\n";
-                                      } else if (b.opr.type == TokenType::GREATER) {
-                                          info.code += "if_icmpgt L1\niconst_0\nL1:\n";
-                                          info.updateDepth(1);
-                                      } else if (b.opr.type == TokenType::GREATER_EQUAL) {
-                                          info.code += "if_icmpge L1\niconst_0\nL1:\n";
-                                          info.updateDepth(1);
-                                      } else if (b.opr.type == TokenType::LESS) {
-                                          info.code += "if_icmplt L1\niconst_0\nL1:\n";
-                                          info.updateDepth(1);
-                                      } else if (b.opr.type == TokenType::LESS_EQUAL) {
-                                          info.code += "if_icmple L1\niconst_0\nL1:\n";
-                                          info.updateDepth(1);
-                                      } else if (b.opr.type == TokenType::EQUAL_EQUAL) {
-                                          info.code += "if_icmpeq L1\niconst_0\nL1:\n";
-                                          info.updateDepth(1);
-                                      } else if (b.opr.type == TokenType::BANG_EQUAL) {
-                                          info.code += "if_icmpne L1\niconst_0\nL1:\n";
-                                          info.updateDepth(1);
-                                      }
-                                  }
-                                  info.updateDepth(2);
-                                  return info;
-                              },
                               [&](const Literal& l) -> AssemblyInfo {
                                   AssemblyInfo info;
                                   std::visit(overloaded {
@@ -103,6 +57,52 @@ public:
                                                  },
                                                  [&](auto&) { std::cerr << "Undefined expression" << std::endl; } },
                                       l.literal);
+                                  return info;
+                              },
+                              [&](Grouping g) -> AssemblyInfo {
+                                  auto info = generateAssembly(*g.expression);
+                                  return info;
+                              },
+                              [&](const Unary& u) -> AssemblyInfo {
+                                  auto info = generateAssembly(*u.value);
+                                  info.code += "ineg\n";
+                                  return info;
+                              },
+                              [&](const Binary& b) -> AssemblyInfo {
+                                  auto leftInfo = generateAssembly(*b.left);
+                                  auto rightInfo = generateAssembly(*b.right);
+                                  AssemblyInfo info;
+                                  switch (b.opr.type) {
+                                  case TokenType::MINUS:
+                                      info.code += leftInfo.code + rightInfo.code + "dsub\n";
+                                      break;
+                                  case TokenType::SLASH:
+                                      info.code += leftInfo.code + rightInfo.code + "ddiv\n";
+                                      break;
+                                  case TokenType::STAR:
+                                      info.code += leftInfo.code + rightInfo.code + "dmul\n";
+                                      break;
+                                  case TokenType::PLUS:
+                                      if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type == AssemblyInfo::Type::DOUBLE) {
+                                          info.code += leftInfo.code + rightInfo.code + "dadd\n";
+                                          info.type = AssemblyInfo::Type::DOUBLE;
+
+                                      } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::STRING) {
+                                          info.code += leftInfo.code + rightInfo.code + "invokevirtual concat(Ljava/lang/String;)Ljava/lang/String;\n";
+                                          info.type = AssemblyInfo::Type::STRING;
+
+                                      } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::DOUBLE) {
+                                          info.code += leftInfo.code + rightInfo.code + "invokestatic java/lang/String/valueOf(D)Ljava/lang/String;\n" + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
+                                          info.type = AssemblyInfo::Type::STRING;
+
+                                      } else if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type == AssemblyInfo::Type::STRING) {
+                                          info.code += leftInfo.code + "invokestatic java/lang/String/valueOf(D)Ljava/lang/String;\n" + rightInfo.code + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
+                                          info.type = AssemblyInfo::Type::STRING;
+                                      } else {
+                                          info.code += leftInfo.code + rightInfo.code + "dadd\n";
+                                      }
+                                      break;
+                                  }
                                   return info;
                               },
                               [&](auto&) -> AssemblyInfo {

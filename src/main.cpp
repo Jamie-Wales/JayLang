@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#define NATIVEIMAGEPATH "/Library/Java/JavaVirtualMachines/graalvm-22.jdk/Contents/Home/bin/native-image";
+const std::string NATIVEIMAGEPATH = "/Library/Java/JavaVirtualMachines/graalvm-22.jdk/Contents/Home/bin/native-image";
 
 void runfile(char* path)
 {
@@ -28,7 +28,7 @@ void runfile(char* path)
             std::cerr << "Compilation failed.\n";
             return;
         }
-        system("/Library/Java/JavaVirtualMachines/graalvm-22.jdk/Contents/Home/bin/native-image  -march=native Example");
+        system((NATIVEIMAGEPATH + " -march=native Example").c_str());
     } else {
         std::cerr << "Failed to open input file: " << path << '\n';
     }
