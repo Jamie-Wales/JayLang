@@ -65,7 +65,15 @@ public:
                               },
                               [&](const Unary& u) -> AssemblyInfo {
                                   auto info = generateAssembly(*u.value);
-                                  info.code += "ineg\n";
+                                  switch (u.opr.type) {
+                                  case TokenType::MINUS:
+                                      checkNumberOperand(u.opr, info.type);
+                                      info.code += info.code + "dneg\n";
+                                      break;
+                                  case TokenType::BANG:
+                                      isTruthy(*u.value) ? info.code += "iconst_0\n" : info.code += "iconst_1\n";
+                                      break;
+                                  }
                                   return info;
                               },
                               [&](const Binary& b) -> AssemblyInfo {
@@ -73,13 +81,26 @@ public:
                                   auto rightInfo = generateAssembly(*b.right);
                                   AssemblyInfo info;
                                   switch (b.opr.type) {
+                                  case TokenType::GREATER:
+                                  case TokenType::GREATER_EQUAL:
+                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
+                                      info.code += leftInfo.code + rightInfo.code + "dcmpg\n";
+                                      break;
+                                  case TokenType::LESS:
+                                  case TokenType::LESS_EQUAL:
+                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
+                                      info.code += leftInfo.code + rightInfo.code + "dcmpl\n";
+                                      break;
                                   case TokenType::MINUS:
+                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
                                       info.code += leftInfo.code + rightInfo.code + "dsub\n";
                                       break;
                                   case TokenType::SLASH:
+                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
                                       info.code += leftInfo.code + rightInfo.code + "ddiv\n";
                                       break;
                                   case TokenType::STAR:
+                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
                                       info.code += leftInfo.code + rightInfo.code + "dmul\n";
                                       break;
                                   case TokenType::PLUS:
@@ -129,6 +150,20 @@ private:
                 return std::get<bool>(l.literal);
         }
         return true;
+    }
+
+    void checkNumberOperands(Token opr, AssemblyInfo::Type left, AssemblyInfo::Type right)
+    {
+        if (left == AssemblyInfo::Type::DOUBLE && right == AssemblyInfo::Type::DOUBLE)
+            return;
+        throw std::runtime_error("Operands must be numbers.");
+    }
+
+    void checkNumberOperand(Token opr, AssemblyInfo::Type right)
+    {
+        if (right == AssemblyInfo::Type::DOUBLE)
+            return;
+        throw std::runtime_error("Operand must be a number.");
     }
 };
 #endif
