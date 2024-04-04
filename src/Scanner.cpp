@@ -187,8 +187,7 @@ void Scanner::scanToken()
         } else if (isAlpha(c)) {
             while (isAlphaNumberic(peek()))
                 advance();
-
-            TokenType type = TokenType::NONE;
+            TokenType type = TokenType::IDENTIFIER;
             std::string output = source.substr(start, current - start);
             try {
                 type = keywords.at(output);

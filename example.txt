@@ -1,1 +1,4 @@
-!10
+jj a = "hello";
+jj b = " world!";
+jj c = a + b;
+lg c;

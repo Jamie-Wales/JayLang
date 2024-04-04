@@ -1,136 +1,16 @@
 #ifndef INCLUDE_COMPILER_H
 #define INCLUDE_COMPILER_H
-
+#include "AssemblyInfo.h"
+#include "Environment.h"
 #include "Expression.h"
+#include "Statement.h"
 #include "Token.h"
-#include <cstddef>
-#include <string>
-#include <variant>
-struct AssemblyInfo {
-    std::string code;
-    size_t maxStackDepth = 0;
-    size_t currentDepth = 0;
-    enum class Type { DOUBLE,
-        STRING,
-        BOOL };
-
-    Type type;
-    void updateDepth(size_t depthNeeded)
-    {
-        currentDepth += depthNeeded;
-        if (currentDepth > maxStackDepth) {
-            maxStackDepth = currentDepth;
-        }
-    }
-    void consume(size_t depthUsed)
-    {
-        if (depthUsed <= currentDepth) {
-            currentDepth -= depthUsed;
-        } else {
-            currentDepth = 0;
-        }
-    }
-};
 
 class Compiler {
 public:
-    AssemblyInfo generateAssembly(const Expr& expr)
-    {
-        return std::visit(overloaded {
-                              [&](const Literal& l) -> AssemblyInfo {
-                                  AssemblyInfo info;
-                                  std::visit(overloaded {
-                                                 [&](double d) {
-                                                     info.code = "ldc2_w " + std::to_string(d) + "\n";
-                                                     info.updateDepth(2);
-                                                     info.type = AssemblyInfo::Type::DOUBLE;
-                                                 },
-                                                 [&](const std::string& s) {
-                                                     info.code = "ldc " + s + "\n";
-                                                     info.updateDepth(2);
-                                                     info.type = AssemblyInfo::Type::STRING;
-                                                 },
-                                                 [&](bool b) {
-                                                     info.code = b ? "iconst_1\n" : "iconst_0\n";
-                                                     info.updateDepth(2);
-                                                     info.type = AssemblyInfo::Type::BOOL;
-                                                 },
-                                                 [&](auto&) { std::cerr << "Undefined expression" << std::endl; } },
-                                      l.literal);
-                                  return info;
-                              },
-                              [&](Grouping g) -> AssemblyInfo {
-                                  auto info = generateAssembly(*g.expression);
-                                  return info;
-                              },
-                              [&](const Unary& u) -> AssemblyInfo {
-                                  auto info = generateAssembly(*u.value);
-                                  switch (u.opr.type) {
-                                  case TokenType::MINUS:
-                                      checkNumberOperand(u.opr, info.type);
-                                      info.code += info.code + "dneg\n";
-                                      break;
-                                  case TokenType::BANG:
-                                      isTruthy(*u.value) ? info.code += "iconst_0\n" : info.code += "iconst_1\n";
-                                      break;
-                                  }
-                                  return info;
-                              },
-                              [&](const Binary& b) -> AssemblyInfo {
-                                  auto leftInfo = generateAssembly(*b.left);
-                                  auto rightInfo = generateAssembly(*b.right);
-                                  AssemblyInfo info;
-                                  switch (b.opr.type) {
-                                  case TokenType::GREATER:
-                                  case TokenType::GREATER_EQUAL:
-                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                      info.code += leftInfo.code + rightInfo.code + "dcmpg\n";
-                                      break;
-                                  case TokenType::LESS:
-                                  case TokenType::LESS_EQUAL:
-                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                      info.code += leftInfo.code + rightInfo.code + "dcmpl\n";
-                                      break;
-                                  case TokenType::MINUS:
-                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                      info.code += leftInfo.code + rightInfo.code + "dsub\n";
-                                      break;
-                                  case TokenType::SLASH:
-                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                      info.code += leftInfo.code + rightInfo.code + "ddiv\n";
-                                      break;
-                                  case TokenType::STAR:
-                                      checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                      info.code += leftInfo.code + rightInfo.code + "dmul\n";
-                                      break;
-                                  case TokenType::PLUS:
-                                      if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type == AssemblyInfo::Type::DOUBLE) {
-                                          info.code += leftInfo.code + rightInfo.code + "dadd\n";
-                                          info.type = AssemblyInfo::Type::DOUBLE;
-
-                                      } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::STRING) {
-                                          info.code += leftInfo.code + rightInfo.code + "invokevirtual concat(Ljava/lang/String;)Ljava/lang/String;\n";
-                                          info.type = AssemblyInfo::Type::STRING;
-
-                                      } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::DOUBLE) {
-                                          info.code += leftInfo.code + rightInfo.code + "invokestatic java/lang/String/valueOf(D)Ljava/lang/String;\n" + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
-                                          info.type = AssemblyInfo::Type::STRING;
-
-                                      } else if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type == AssemblyInfo::Type::STRING) {
-                                          info.code += leftInfo.code + "invokestatic java/lang/String/valueOf(D)Ljava/lang/String;\n" + rightInfo.code + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
-                                          info.type = AssemblyInfo::Type::STRING;
-                                      } else {
-                                          info.code += leftInfo.code + rightInfo.code + "dadd\n";
-                                      }
-                                      break;
-                                  }
-                                  return info;
-                              },
-                              [&](auto&) -> AssemblyInfo {
-                                  throw std::runtime_error("Unsupported expression type");
-                              } },
-            expr.content);
-    }
+    Environment environment;
+    AssemblyInfo generateAssembly(const Expr& expr);
+    AssemblyInfo generateAssembly(const Statement& stmt);
 
 private:
     template <class... Ts>
@@ -139,27 +19,15 @@ private:
     };
     template <class... Ts>
     overloaded(Ts...) -> overloaded<Ts...>;
-
-    bool isTruthy(Expr object)
-    {
-        if (std::holds_alternative<Literal>(object.content)) {
-            Literal l = std::get<Literal>(object.content);
-            if (std::holds_alternative<nullptr_t>(l.literal))
-                return false;
-            if (std::holds_alternative<bool>(l.literal))
-                return std::get<bool>(l.literal);
-        }
-        return true;
-    }
-
-    void checkNumberOperands(Token opr, AssemblyInfo::Type left, AssemblyInfo::Type right)
+    bool isTruthy(Expr& object);
+    void checkNumberOperands(const Token& opr, const AssemblyInfo::Type& left, const AssemblyInfo::Type& right)
     {
         if (left == AssemblyInfo::Type::DOUBLE && right == AssemblyInfo::Type::DOUBLE)
             return;
         throw std::runtime_error("Operands must be numbers.");
     }
 
-    void checkNumberOperand(Token opr, AssemblyInfo::Type right)
+    void checkNumberOperand(const Token& opr, const AssemblyInfo::Type& right) const
     {
         if (right == AssemblyInfo::Type::DOUBLE)
             return;

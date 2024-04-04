@@ -1,8 +1,8 @@
 #ifndef INCLUDE_INCLUDE_PARSER_H_
 #define INCLUDE_INCLUDE_PARSER_H_
 #include "ErrorHandler.h"
-#include "Expression.h"
 #include "ParseError.h"
+#include "Statement.h"
 #include "Token.h"
 #include <memory>
 
@@ -10,7 +10,7 @@ class Parser {
 public:
     Parser(std::vector<Token> tokens)
         : tokens { std::move(tokens) } {};
-    std::shared_ptr<Expr> parse();
+    std::vector<std::shared_ptr<Statement>> parse();
     ErrorHandler err = {};
     size_t current = 0;
 
@@ -26,6 +26,12 @@ private:
     std::shared_ptr<Expr> primary();
     std::shared_ptr<Expr> comma();
     std::shared_ptr<Expr> ternary();
+    std::shared_ptr<Expr> variable();
+    std::shared_ptr<Statement> statement();
+    std::shared_ptr<Statement> declaration();
+    std::shared_ptr<Statement> printStatement();
+    std::shared_ptr<Statement> jjdeclaration();
+    std::shared_ptr<Statement> expressionStatement();
 
     bool match(const std::initializer_list<TokenType>& types);
     Token& peek();

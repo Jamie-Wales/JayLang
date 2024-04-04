@@ -1,17 +1,57 @@
 #include "Parser.h"
-#include "Expression.h"
-#include "Token.h"
+#include "Statement.h"
 #include <memory>
 
-std::shared_ptr<Expr> Parser::parse()
+std::vector<std::shared_ptr<Statement>> Parser::parse()
+{
+    std::vector<std::shared_ptr<Statement>> statements;
+    while (!isAtEnd()) {
+        statements.push_back(declaration());
+    }
+    return statements;
+};
+
+std::shared_ptr<Statement> Parser::declaration()
 {
     try {
-        return expression();
+        if (match({ TokenType::JJ }))
+            return jjdeclaration();
+        return statement();
     } catch (ParseError& error) {
-        err.handlerError(peek().line, error.what());
         synchronize();
         return nullptr;
     }
+};
+
+std::shared_ptr<Statement> Parser::jjdeclaration()
+{
+    auto name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+    consume(TokenType::EQUAL, "Expect '=' after variable name.");
+    auto value = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' after value.");
+    return std::make_shared<Statement>(Statement { JJStatement { name, value } });
+};
+
+std::shared_ptr<Statement> Parser::expressionStatement()
+{
+    auto expr = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+    return std::make_shared<Statement>(Statement { ExprStatement { expr } });
+};
+
+std::shared_ptr<Statement> Parser::statement()
+{
+    if (match({ TokenType::PRINT }))
+        return printStatement();
+    return expressionStatement();
+};
+
+std::shared_ptr<Statement> Parser::printStatement()
+{
+    auto value = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' after value.");
+    auto stmt = std::make_shared<Statement>(Statement { PrintStatement { value } });
+    return stmt;
 };
 
 std::shared_ptr<Expr> Parser::expression()
@@ -112,6 +152,8 @@ std::shared_ptr<Expr> Parser::unary()
 
 std::shared_ptr<Expr> Parser::primary()
 {
+    if (match({ TokenType::IDENTIFIER }))
+        return std::make_shared<Expr>(ExprType::VARIABLE, Variable { previous() });
     if (match({ TokenType::FALSE }))
         return std::make_shared<Expr>(ExprType::LITERAL, Literal { true });
     if (match({ TokenType::TRUE }))

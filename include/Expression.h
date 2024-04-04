@@ -9,7 +9,8 @@ enum class ExprType {
     UNARY,
     BINARY,
     GROUPING,
-    TERNARY
+    TERNARY,
+    VARIABLE
 };
 
 #include <variant>
@@ -42,24 +43,21 @@ struct Ternary {
     std::shared_ptr<Expr> right;
 };
 
-struct Function {
-    const Token name;
-    const std::vector<std::shared_ptr<Expr>> params;
-};
-
 struct Literal {
     const std::variant<double, std::string, bool, nullptr_t> literal;
+};
+
+struct Variable {
+    const Token name;
 };
 
 class Expr {
 public:
     ExprType type;
     std::variant<Unary,
-        Binary, Assign, Grouping, Literal, Ternary>
-
+        Binary, Assign, Grouping, Literal, Ternary, Variable>
         content;
-    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary> content)
-
+    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary, Variable> content)
         : type(type)
         , content(std::move(content)) {};
 

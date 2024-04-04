@@ -4,7 +4,6 @@
 #include "Scanner.h"
 #include <cstdlib>
 #include <fstream>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -19,10 +18,13 @@ void runfile(char* path)
 
         Parser parser { output };
         auto parse = parser.parse();
-        if (parser.err.error || parse == nullptr)
-            return;
         Compiler compiler {};
-        writeToFile(compiler.generateAssembly(*parse), "./Example.j");
+        AssemblyInfo assem;
+        Linker linker {};
+        for (auto& stmt : parse) {
+            linker.addCode(compiler.generateAssembly(*stmt).code);
+        }
+        linker.writeToFile("./Example.j");
         std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ Example.j";
         if (system(compileCommand.c_str()) != 0) {
             std::cerr << "Compilation failed.\n";
@@ -46,12 +48,12 @@ void runPrompt()
         std::vector<Token> tokens = scan.scanTokens();
         Parser parser { tokens };
         auto expr = parser.parse();
-        if (parser.err.error && expr == nullptr)
+        /*  if (parser.err.error && expr == nullptr)
             continue;
 
         Compiler compiler {};
         writeToFile(compiler.generateAssembly(*expr), "./example.j");
-
+*/
         std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ ./example.j";
         if (system(compileCommand.c_str()) != 0) {
             std::cerr << "Compilation failed.\n";
