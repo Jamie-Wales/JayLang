@@ -9,6 +9,7 @@ struct AssemblyInfo {
     enum class Type { DOUBLE,
         STRING,
         BOOL,
+        NULL_T,
         VARS,
         VARD,
         VARB };

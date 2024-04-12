@@ -1,7 +1,11 @@
 #include "Compiler.h"
+#include "AssemblyInfo.h"
 #include "Environment.h"
+#include "Expression.h"
 #include "Statement.h"
+#include <cstddef>
 #include <memory>
+#include <string>
 
 AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
 {
@@ -13,9 +17,9 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                               info.code += exprInfo.code;
                               info.type = exprInfo.type;
                               if (info.type == AssemblyInfo::Type::DOUBLE) {
-                                  info.code += "invokestatic java/lang/String/valueOf(D)Ljava/lang/String;\n";
+                                  info.code += "invokevirtual java/lang/Double/toString()Ljava/lang/String;\n";
                               } else if (info.type == AssemblyInfo::Type::BOOL) {
-                                  info.code += "invokestatic java/lang/String/valueOf(Z)Ljava/lang/String;\n";
+                                  info.code += "invokestatic java/lang/Boolean/toString()Ljava/lang/String;\n";
                               }
                               info.code += "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\n";
                               return info;
@@ -46,6 +50,7 @@ AssemblyInfo Compiler::generateAssembly(const Expr& expr)
                               std::visit(overloaded {
                                              [&](double d) {
                                                  info.code = "ldc2_w " + std::to_string(d) + "\n";
+                                                 info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                                  info.updateDepth(2);
                                                  info.type = AssemblyInfo::Type::DOUBLE;
                                              },
@@ -59,11 +64,16 @@ AssemblyInfo Compiler::generateAssembly(const Expr& expr)
                                                  info.updateDepth(2);
                                                  info.type = AssemblyInfo::Type::BOOL;
                                              },
+                                             [&](nullptr_t null) {
+                                                 info.code = "aconst_null\n";
+                                                 info.updateDepth(1);
+                                                 info.type = AssemblyInfo::Type::NULL_T;
+                                             },
                                              [&](auto&) { std::cerr << "Undefined expression" << std::endl; } },
                                   l.literal);
                               return info;
                           },
-                          [&](Grouping g) -> AssemblyInfo {
+                          [&](const Grouping& g) -> AssemblyInfo {
                               auto info = generateAssembly(*g.expression);
                               return info;
                           },
@@ -72,7 +82,9 @@ AssemblyInfo Compiler::generateAssembly(const Expr& expr)
                               switch (u.opr.type) {
                               case TokenType::MINUS:
                                   checkNumberOperand(u.opr, info.type);
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
                                   info.code += "dneg\n";
+                                  info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                   break;
                               case TokenType::BANG:
                                   isTruthy(*u.value) ? info.code += "iconst_0\n" : info.code += "iconst_1\n";
@@ -88,53 +100,91 @@ AssemblyInfo Compiler::generateAssembly(const Expr& expr)
                               case TokenType::GREATER:
                               case TokenType::GREATER_EQUAL:
                                   checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                  info.code += leftInfo.code + rightInfo.code + "dcmpg\n";
+                                  info.code += leftInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n"; // Unbox left operand
+                                  info.code += rightInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n"; // Unbox right operand
+                                  info.code += "dcmpg\n";
+                                  info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                   break;
                               case TokenType::LESS:
                               case TokenType::LESS_EQUAL:
                                   checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                  info.code += leftInfo.code + rightInfo.code + "dcmpl\n";
+                                  info.code += leftInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n"; // Unbox left operand
+                                  info.code += rightInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n"; // Unbox right operand
+                                  info.code += "dcmpl\n";
+                                  info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                   break;
                               case TokenType::MINUS:
                                   checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                  info.code += leftInfo.code + rightInfo.code + "dsub\n";
+                                  info.code += leftInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n"; // Unbox left operand
+                                  info.code += rightInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n"; // Unbox right operand
+                                  info.code += "dsub\n";
+                                  info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                   info.type = AssemblyInfo::Type::DOUBLE;
-
                                   break;
                               case TokenType::SLASH:
                                   checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                  info.code += leftInfo.code + rightInfo.code + "ddiv\n";
+                                  info.code += leftInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n"; // Unbox left operand
+                                  info.code += rightInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
+                                  info.code += "ddiv\n";
+                                  info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                   info.type = AssemblyInfo::Type::DOUBLE;
                                   break;
                               case TokenType::STAR:
                                   checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-                                  info.code += leftInfo.code + rightInfo.code + "dmul\n";
+                                  info.code += leftInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
+                                  info.code += rightInfo.code;
+                                  info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
+                                  info.code += "dmul\n";
+                                  info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                   info.type = AssemblyInfo::Type::DOUBLE;
                                   break;
                               case TokenType::PLUS:
                                   if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type == AssemblyInfo::Type::DOUBLE) {
-                                      info.code += leftInfo.code + rightInfo.code + "dadd\n";
+                                      info.code += leftInfo.code;
+                                      info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
+                                      info.code += rightInfo.code;
+                                      info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
+                                      info.code += "dadd\n";
+                                      info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                       info.type = AssemblyInfo::Type::DOUBLE;
                                   } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::STRING) {
                                       info.code += leftInfo.code + rightInfo.code + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
                                       info.type = AssemblyInfo::Type::STRING;
-
                                   } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::DOUBLE) {
-                                      info.code += leftInfo.code + rightInfo.code + "invokestatic java/lang/String/valueOf(D)Ljava/lang/String;\n" + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
+                                      info.code += leftInfo.code;
+                                      info.code += rightInfo.code;
+                                      info.code += "invokevirtual java/lang/Double/toString()Ljava/lang/String;\n";
+                                      info.code += "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
                                       info.type = AssemblyInfo::Type::STRING;
-
                                   } else if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type == AssemblyInfo::Type::STRING) {
-                                      info.code += leftInfo.code + "invokestatic java/lang/String/valueOf(D)Ljava/lang/String;\n" + rightInfo.code + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
+                                      info.code += leftInfo.code + "invokevirtual java/lang/Double/toString()Ljava/lang/String;\n";
+                                      info.code += rightInfo.code + "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
                                       info.type = AssemblyInfo::Type::STRING;
                                   };
                                   break;
                               }
                               return info;
                           },
-                          [&](const Variable& v) {
+                          [&](const Variable& v) -> AssemblyInfo {
                               AssemblyInfo info;
                               auto element = environment.get(v.name.getLexeme());
-                              info = element->info;
+                              info.code += "aload " + std::to_string(element->index) + "\n";
+                              info.type = element->info.type;
+                              return info;
+                          },
+                          [&](const Assign& a) -> AssemblyInfo {
+                              AssemblyInfo info = generateAssembly(*a.value);
+                              int index = environment.assign(a.name.getLexeme(), info);
+                              info.code += "astore " + std::to_string(index) + "\n";
                               return info;
                           },
                           [&](auto&) -> AssemblyInfo {
@@ -144,6 +194,7 @@ AssemblyInfo Compiler::generateAssembly(const Expr& expr)
 }
 
 bool Compiler::isTruthy(Expr& object)
+
 {
     if (std::holds_alternative<Literal>(object.content)) {
         Literal l = std::get<Literal>(object.content);

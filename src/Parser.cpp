@@ -1,5 +1,7 @@
 #include "Parser.h"
+#include "Expression.h"
 #include "Statement.h"
+#include "Token.h"
 #include <memory>
 
 std::vector<std::shared_ptr<Statement>> Parser::parse()
@@ -9,7 +11,7 @@ std::vector<std::shared_ptr<Statement>> Parser::parse()
         statements.push_back(declaration());
     }
     return statements;
-};
+}
 
 std::shared_ptr<Statement> Parser::declaration()
 {
@@ -21,30 +23,51 @@ std::shared_ptr<Statement> Parser::declaration()
         synchronize();
         return nullptr;
     }
-};
+}
 
 std::shared_ptr<Statement> Parser::jjdeclaration()
 {
     auto name = consume(TokenType::IDENTIFIER, "Expect variable name.");
-    consume(TokenType::EQUAL, "Expect '=' after variable name.");
-    auto value = expression();
+    auto expr = Expr { ExprType::LITERAL, Literal { nullptr } };
+    auto value = std::make_shared<Expr>(expr);
+    if (match({ TokenType::EQUAL }))
+        value = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after value.");
     return std::make_shared<Statement>(Statement { JJStatement { name, value } });
-};
+}
 
 std::shared_ptr<Statement> Parser::expressionStatement()
 {
     auto expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after expression.");
     return std::make_shared<Statement>(Statement { ExprStatement { expr } });
-};
+}
+
+std::shared_ptr<Expr> Parser::assignment()
+{
+    auto expr = comma();
+
+    if (match({ TokenType::EQUAL })) {
+        Token equals = previous();
+        auto value = assignment();
+        if (expr->type == ExprType::VARIABLE) {
+            auto var = std::get<Variable>(expr->content);
+            Token name = var.name;
+            auto newExpr = Expr { ExprType::ASSIGNMENT, Assign { name, value } };
+            return std::make_shared<Expr>(newExpr);
+        }
+        error(equals, "Invalid assignment target");
+    }
+
+    return expr;
+}
 
 std::shared_ptr<Statement> Parser::statement()
 {
     if (match({ TokenType::PRINT }))
         return printStatement();
     return expressionStatement();
-};
+}
 
 std::shared_ptr<Statement> Parser::printStatement()
 {
@@ -52,12 +75,12 @@ std::shared_ptr<Statement> Parser::printStatement()
     consume(TokenType::SEMICOLON, "Expect ';' after value.");
     auto stmt = std::make_shared<Statement>(Statement { PrintStatement { value } });
     return stmt;
-};
+}
 
 std::shared_ptr<Expr> Parser::expression()
 {
-    return comma();
-};
+    return assignment();
+}
 
 std::shared_ptr<Expr> Parser::comma()
 {
@@ -66,10 +89,10 @@ std::shared_ptr<Expr> Parser::comma()
         auto opr = previous();
         auto right = ternary();
         expr = std::make_shared<Expr>(ExprType::BINARY, Binary { expr, opr, right });
-    };
+    }
 
     return expr;
-};
+}
 
 std::shared_ptr<Expr> Parser::ternary()
 {
@@ -97,7 +120,7 @@ std::shared_ptr<Expr> Parser::equality()
     };
 
     return expr;
-};
+}
 
 std::shared_ptr<Expr> Parser::comparison()
 {
@@ -111,7 +134,7 @@ std::shared_ptr<Expr> Parser::comparison()
     };
 
     return expr;
-};
+}
 
 std::shared_ptr<Expr> Parser::term()
 {
@@ -125,7 +148,7 @@ std::shared_ptr<Expr> Parser::term()
     };
 
     return expr;
-};
+}
 
 std::shared_ptr<Expr> Parser::factor()
 {
@@ -180,12 +203,13 @@ bool Parser::match(const std::initializer_list<TokenType>& types)
         }
     }
     return false;
-};
+}
 
 Token& Parser::previous()
 {
     return tokens.at(current - 1);
 }
+
 Token& Parser::consume(TokenType type, const std::string& message)
 {
     if (check(type))
@@ -197,7 +221,7 @@ ParseError Parser::error(Token& token, const std::string& message)
 {
     err.handlerError(token.line, message);
     return ParseError(token, message);
-};
+}
 
 bool Parser::check(TokenType type)
 {
@@ -220,7 +244,7 @@ Token& Parser::advance()
 bool Parser::isAtEnd()
 {
     return peek().type == TokenType::ENDOFFILE;
-};
+}
 
 void Parser::synchronize()
 {

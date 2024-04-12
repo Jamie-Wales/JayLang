@@ -1,4 +1,4 @@
-jj a = "hello";
-jj b = " world!";
-jj c = a + b;
+jj c = "jamie";
+c = "poop";
+c = "a" + 10 * 100 + (1 + 1);
 lg c;

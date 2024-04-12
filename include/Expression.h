@@ -4,16 +4,17 @@
 #include "Token.h"
 #include <iostream>
 #include <memory>
+#include <variant>
+
 enum class ExprType {
     LITERAL,
     UNARY,
     BINARY,
     GROUPING,
     TERNARY,
-    VARIABLE
+    VARIABLE,
+    ASSIGNMENT
 };
-
-#include <variant>
 
 class Expr;
 
@@ -29,7 +30,7 @@ struct Grouping {
 
 struct Assign {
     const Token name;
-    std::unique_ptr<Expr> value;
+    std::shared_ptr<Expr> value;
 };
 
 struct Unary {
@@ -48,7 +49,8 @@ struct Literal {
 };
 
 struct Variable {
-    const Token name;
+    Token name;
+    std::shared_ptr<Expr> value;
 };
 
 class Expr {
