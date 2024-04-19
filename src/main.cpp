@@ -24,11 +24,13 @@ void runfile(char* path)
         for (auto& stmt : parse) {
             size_t scopeDepth = compiler.environment.scope;
             linker.addCode(compiler.generateAssembly(*stmt).code);
-            if (scopeDepth != compiler.environment.scope) {
-                generateLocalVariables(assem, compiler.environment);
-            }
         }
 
+        if (compiler.environment.scope > 0) {
+            generateLocalVariables(assem, compiler.environment);
+        } else {
+            assem.code += ("    return");
+        }
         linker.addCode(assem.code);
 
         linker.writeToFile("./Example.j");

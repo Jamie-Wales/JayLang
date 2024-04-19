@@ -9,19 +9,22 @@
 
 void generateLocalVariables(AssemblyInfo& info, Environment& environment)
 {
+
+    info.code += "return\n";
+    info.code += ".localvariabletable\n";
     for (auto& [name, variable] : environment.variables) {
-        info.code += "return\n";
-        info.code += ".localvariabletable\n";
+        if (variable.scope == 0)
+            continue;
         info.code += std::to_string(variable.index) + " ";
         switch (variable.info.type) {
         case AssemblyInfo::Type::DOUBLE:
-            info.code += "is " + name + variable.name + " Ljava/lang/Double;" + " from " + "L" + std::to_string(environment.scope - 1) + " to " + "L" + std::to_string(environment.scope) + "\n";
+            info.code += "is " + name + variable.name + " Ljava/lang/Double;" + " from " + "L" + std::to_string(variable.scope) + " to " + "L" + std::to_string(variable.scope + 1) + "\n";
             break;
         case AssemblyInfo::Type::STRING:
-            info.code += "is " + name + " Ljava/lang/String;" + " from " + "L" + std::to_string(environment.scope - 1) + " to " + "L" + std::to_string(environment.scope) + "\n";
+            info.code += "is " + name + " Ljava/lang/String;" + " from " + "L" + std::to_string(variable.scope) + " to " + "L" + std::to_string(variable.scope + 1) + "\n";
             break;
         default:
-            info.code += "is " + variable.name + "Ljava/lang/Object;" + " from " + "L" + std::to_string(environment.scope - 1) + " to " + "L" + std::to_string(environment.scope) + "\n";
+            info.code += "is " + variable.name + "Ljava/lang/Object;" + " from " + "L" + std::to_string(variable.scope) + " to " + "L" + std::to_string(variable.scope + 1) + "\n";
             break;
         }
     }
@@ -70,6 +73,7 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                                   info.code += blockInfo.code;
                               }
 
+                              environment.clear();
                               environment.scope++;
                               info.code += "L" + std::to_string(environment.scope) + ":\n";
                               return info;

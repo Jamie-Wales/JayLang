@@ -1,7 +1,9 @@
 jj c = "jamie";
 c = "poop";
 {
-    lg c;
+jj c = "adoaksd";
+ lg c;
 }
+lg c;
 c = "a" + 10 * 100 + (1 + 1);
 lg c;
