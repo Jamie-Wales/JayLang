@@ -10,16 +10,18 @@ struct EnvVariable {
     std::string name;
     AssemblyInfo info;
     size_t index;
+    size_t scope;
 };
 
 class Environment {
 public:
+    Environment() {};
     size_t varibleCount = 0;
+    size_t scope = 0;
     std::unordered_map<std::string, EnvVariable> variables;
-    Environment() = default;
     void define(const std::string name, AssemblyInfo info)
     {
-        EnvVariable var = { name, info, varibleCount };
+        EnvVariable var = { name, info, varibleCount, scope };
         variables[name] = var;
         varibleCount++;
     }
@@ -29,7 +31,7 @@ public:
         for (auto& [index, value] : variables) {
             if (index == name) {
                 auto curr = variables.at(name);
-                EnvVariable next { name, info, curr.index };
+                EnvVariable next { name, info, curr.index, scope };
                 variables[name] = next;
                 return curr.index;
             }

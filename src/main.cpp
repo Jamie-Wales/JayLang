@@ -19,11 +19,18 @@ void runfile(char* path)
         Parser parser { output };
         auto parse = parser.parse();
         Compiler compiler {};
-        AssemblyInfo assem;
+        AssemblyInfo assem = {};
         Linker linker {};
         for (auto& stmt : parse) {
+            size_t scopeDepth = compiler.environment.scope;
             linker.addCode(compiler.generateAssembly(*stmt).code);
+            if (scopeDepth != compiler.environment.scope) {
+                generateLocalVariables(assem, compiler.environment);
+            }
         }
+
+        linker.addCode(assem.code);
+
         linker.writeToFile("./Example.j");
         std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ Example.j";
         if (system(compileCommand.c_str()) != 0) {

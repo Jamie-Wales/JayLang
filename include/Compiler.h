@@ -6,9 +6,11 @@
 #include "Statement.h"
 #include "Token.h"
 
+void generateLocalVariables(AssemblyInfo& info, Environment& environment);
+
 class Compiler {
 public:
-    Environment environment;
+    Environment environment = {};
     AssemblyInfo generateAssembly(const Expr& expr);
     AssemblyInfo generateAssembly(const Statement& stmt);
 

@@ -32,6 +32,7 @@ private:
     std::shared_ptr<Statement> printStatement();
     std::shared_ptr<Statement> jjdeclaration();
     std::shared_ptr<Statement> expressionStatement();
+    std::shared_ptr<Statement> blockStatement();
     std::shared_ptr<Expr> assignment();
 
     bool match(const std::initializer_list<TokenType>& types);

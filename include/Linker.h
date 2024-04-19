@@ -24,7 +24,6 @@ public:
             throw std::runtime_error("Failed to open file for writing.");
         }
         file << code << "\n"
-             << "    return\n"
              << ".end code\n"
              << ".end method\n"
              << ".end class\n";

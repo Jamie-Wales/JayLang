@@ -7,6 +7,28 @@
 #include <memory>
 #include <string>
 
+void generateLocalVariables(AssemblyInfo& info, Environment& environment)
+{
+    for (auto& [name, variable] : environment.variables) {
+        info.code += "return\n";
+        info.code += ".localvariabletable\n";
+        info.code += std::to_string(variable.index) + " ";
+        switch (variable.info.type) {
+        case AssemblyInfo::Type::DOUBLE:
+            info.code += "is " + name + variable.name + " Ljava/lang/Double;" + " from " + "L" + std::to_string(environment.scope - 1) + " to " + "L" + std::to_string(environment.scope) + "\n";
+            break;
+        case AssemblyInfo::Type::STRING:
+            info.code += "is " + name + " Ljava/lang/String;" + " from " + "L" + std::to_string(environment.scope - 1) + " to " + "L" + std::to_string(environment.scope) + "\n";
+            break;
+        default:
+            info.code += "is " + variable.name + "Ljava/lang/Object;" + " from " + "L" + std::to_string(environment.scope - 1) + " to " + "L" + std::to_string(environment.scope) + "\n";
+            break;
+        }
+    }
+
+    info.code += ".end localvariabletable\n";
+}
+
 AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
 {
     return std::visit(overloaded {
@@ -34,6 +56,22 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                               auto element = environment.get(js.name.getLexeme());
                               info.code += "astore " + std::to_string(element->index) + "\n";
                               info.updateDepth(+1);
+                              return info;
+                          },
+                          [&](const Block& b) {
+                              AssemblyInfo info = {};
+
+                              environment.scope++;
+                              info.code += "L" + std::to_string(environment.scope) + ":\n";
+
+                              for (std::shared_ptr<Statement> stmt : b.statements) {
+                                  Statement statement = *stmt;
+                                  AssemblyInfo blockInfo = generateAssembly(statement);
+                                  info.code += blockInfo.code;
+                              }
+
+                              environment.scope++;
+                              info.code += "L" + std::to_string(environment.scope) + ":\n";
                               return info;
                           },
                           [&](auto&) {

@@ -13,6 +13,16 @@ std::vector<std::shared_ptr<Statement>> Parser::parse()
     return statements;
 }
 
+std::shared_ptr<Statement> Parser::blockStatement()
+{
+    std::vector<std::shared_ptr<Statement>> statements;
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        statements.push_back(declaration());
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return std::make_shared<Statement>(Statement { Block { statements } });
+}
+
 std::shared_ptr<Statement> Parser::declaration()
 {
     try {
@@ -66,6 +76,8 @@ std::shared_ptr<Statement> Parser::statement()
 {
     if (match({ TokenType::PRINT }))
         return printStatement();
+    if (match({ TokenType::LEFT_BRACE }))
+        return blockStatement();
     return expressionStatement();
 }
 
