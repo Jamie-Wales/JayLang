@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-const std::string NATIVEIMAGEPATH = "/Library/Java/JavaVirtualMachines/graalvm-22.jdk/Contents/Home/bin/native-image";
+const std::string NATIVEIMAGEPATH = "/Users/jamie/Library/Java/JavaVirtualMachines/graalvm-jdk-22.0.1+8.1/Contents/Home/bin/native-image";
 
 void runfile(char* path)
 {
@@ -22,15 +22,10 @@ void runfile(char* path)
         AssemblyInfo assem = {};
         Linker linker {};
         for (auto& stmt : parse) {
-            size_t scopeDepth = compiler.environment.scope;
             linker.addCode(compiler.generateAssembly(*stmt).code);
         }
 
-        if (compiler.environment.scope > 0) {
-            generateLocalVariables(assem, compiler.environment);
-        } else {
-            assem.code += ("    return");
-        }
+        generateLocalVariables(assem, &compiler.environment);
         linker.addCode(assem.code);
 
         linker.writeToFile("./Example.j");

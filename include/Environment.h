@@ -1,83 +1,98 @@
 #ifndef INCLUDE_ENVIRONMENT_H_
 #define INCLUDE_ENVIRONMENT_H_
 #include "AssemblyInfo.h"
-#include "Token.h"
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 struct EnvVariable {
     std::string name;
     AssemblyInfo info;
     size_t index;
-    size_t scope;
 };
 
-// todo make env linked list
 class Environment {
 public:
-    Environment() {};
+    Environment() = default;
     size_t varibleCount = 0;
-    size_t scope = 0;
+    size_t envindex = 0;
+    Environment* parent = nullptr;
+    Environment* child = nullptr;
     std::unordered_map<std::string, EnvVariable> variables;
-    void define(const std::string name, AssemblyInfo info)
+    void define(const std::string &name, const AssemblyInfo &info)
     {
-        EnvVariable var = { name, info, varibleCount, scope };
+        EnvVariable var = { name, info, varibleCount };
         if (variables.find(name) != variables.end()) {
-            if (variables.at(name).scope == scope) {
-                std::runtime_error error("Cannot redefine " + name);
-                throw error;
-            }
+            std::runtime_error error("Cannot redefine " + name);
+            throw error;
         }
-        variables[name + std::to_string(scope)] = var;
+        variables[name] = var;
         varibleCount++;
+    }
+
+    Environment* createChild()
+    {
+        const auto newEnv = new Environment();
+        newEnv->parent = this;
+        child = newEnv;
+        child->envindex = this->envindex + 1;
+        return newEnv;
     }
 
     int assign(std::string name, AssemblyInfo info)
     {
-        int scope = this->scope;
-        while (scope >= 0) {
+
+        Environment* child = this;
+        while (child != nullptr) {
             for (auto& [index, value] : variables) {
-                if (index == name + std::to_string(scope)) {
-                    auto curr = variables.at(name + std::to_string(scope));
-                    EnvVariable next { name, info, curr.index, (size_t)scope };
-                    variables[name + std::to_string(scope)] = next;
+                if (index == name) {
+                    auto curr = variables.at(name);
+                    EnvVariable next { name, info, curr.index };
+                    variables[name] = next;
                     return curr.index;
                 }
             }
-            scope--;
+            child  = child->child;
         }
+
         std::runtime_error error("Cannot assign " + name + " does not exist");
         return -1;
     }
 
-    std::shared_ptr<EnvVariable> get(const std::string name)
+    std::shared_ptr<EnvVariable> get(const std::string& name)
     {
-        int scope = this->scope;
-        while (scope >= 0) {
+        Environment* parent = this;
+        while (parent != nullptr) {
             for (auto& [index, value] : variables) {
-                if (index == name + std::to_string(scope)) {
+                if (index == name) {
                     return std::make_shared<EnvVariable>(value);
                 }
             }
-            scope--;
+            parent = parent->parent;
         }
         return nullptr;
     }
 
     void clear()
     {
-        std::vector<std::string> toRemove;
-        size_t scope = this->scope;
-        for (auto& [index, value] : variables) {
-            if (value.scope == scope) {
-                toRemove.push_back(index);
+        struct pair {
+            Environment* env;
+            std::string name;
+        };
+
+        std::vector<pair> toRemove;
+        Environment* parent = this;
+        while (parent != nullptr) {
+            for (auto& [index, value] : variables) {
+                toRemove.push_back({ parent, index });
             }
+            parent = parent->parent;
         }
 
         for (auto& index : toRemove) {
-            variables.erase(index);
+            index.env->variables.erase(index.name);
         }
     }
 };

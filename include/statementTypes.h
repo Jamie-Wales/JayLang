@@ -5,6 +5,7 @@
 
 #include "Expression.h"
 #include <memory>
+#include <vector>
 
 struct ExprStatement {
     std::shared_ptr<Expr> expression;

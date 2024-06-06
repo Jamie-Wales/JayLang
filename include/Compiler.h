@@ -6,7 +6,7 @@
 #include "Statement.h"
 #include "Token.h"
 
-void generateLocalVariables(AssemblyInfo& info, Environment& environment);
+void generateLocalVariables(AssemblyInfo& info, Environment* environment);
 
 class Compiler {
 public:

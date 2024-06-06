@@ -3,11 +3,13 @@
 #include "ErrorHandler.h"
 #include "Token.h"
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 class Scanner {
 private:
     const std::string source;
-    std::vector<Token> tokens {};
+    std::vector<Token> tokens;
     size_t start = 0;
     size_t current = 0;
     size_t line = 0;

@@ -4,29 +4,29 @@
 #include "Expression.h"
 #include "Statement.h"
 #include <cstddef>
-#include <memory>
 #include <string>
 
-void generateLocalVariables(AssemblyInfo& info, Environment& environment)
+void generateLocalVariables(AssemblyInfo& info, Environment* environment)
 {
 
     info.code += "return\n";
     info.code += ".localvariabletable\n";
-    for (auto& [name, variable] : environment.variables) {
-        if (variable.scope == 0)
-            continue;
-        info.code += std::to_string(variable.index) + " ";
-        switch (variable.info.type) {
-        case AssemblyInfo::Type::DOUBLE:
-            info.code += "is " + name + variable.name + " Ljava/lang/Double;" + " from " + "L" + std::to_string(variable.scope) + " to " + "L" + std::to_string(variable.scope + 1) + "\n";
-            break;
-        case AssemblyInfo::Type::STRING:
-            info.code += "is " + name + " Ljava/lang/String;" + " from " + "L" + std::to_string(variable.scope) + " to " + "L" + std::to_string(variable.scope + 1) + "\n";
-            break;
-        default:
-            info.code += "is " + variable.name + "Ljava/lang/Object;" + " from " + "L" + std::to_string(variable.scope) + " to " + "L" + std::to_string(variable.scope + 1) + "\n";
-            break;
+    while (environment != nullptr) {
+        for (auto& [name, variable] : environment->variables) {
+            info.code += std::to_string(variable.index) + " ";
+            switch (variable.info.type) {
+            case AssemblyInfo::Type::DOUBLE:
+                info.code += "is " + variable.name + " Ljava/lang/Double;" + " from " + "L" + std::to_string(environment->envindex) + " to " + "L" + std::to_string(environment->envindex + 1) + "\n";
+                break;
+            case AssemblyInfo::Type::STRING:
+                info.code += "is " + variable.name + " Ljava/lang/String;" + " from " + "L" + std::to_string(environment->envindex) + " to " + "L" + std::to_string(environment->envindex + 1) + "\n";
+                break;
+            default:
+                info.code += "is " + variable.name + "Ljava/lang/Object;" + " from " + "L" + std::to_string(environment->envindex) + " to " + "L" + std::to_string(environment->envindex + 1) + "\n";
+                break;
+            }
         }
+        environment = environment->child;
     }
 
     info.code += ".end localvariabletable\n";
@@ -64,18 +64,18 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                           [&](const Block& b) {
                               AssemblyInfo info = {};
 
-                              environment.scope++;
-                              info.code += "L" + std::to_string(environment.scope) + ":\n";
+                              const Environment* env = environment.createChild();
+                              this->environment = *env;
+                              info.code += "L" + std::to_string(env->envindex) + ":\n";
 
-                              for (std::shared_ptr<Statement> stmt : b.statements) {
-                                  Statement statement = *stmt;
-                                  AssemblyInfo blockInfo = generateAssembly(statement);
+                              for (const std::shared_ptr<Statement>& ptr : b.statements) {
+                                  AssemblyInfo blockInfo = generateAssembly(*ptr);
                                   info.code += blockInfo.code;
                               }
 
-                              environment.clear();
-                              environment.scope++;
-                              info.code += "L" + std::to_string(environment.scope) + ":\n";
+                              info.code += "L" + std::to_string(environment.envindex + 1) + ":\n";
+                              this->environment = *this->environment.parent;
+                              delete this->environment.child;
                               return info;
                           },
                           [&](auto&) {
