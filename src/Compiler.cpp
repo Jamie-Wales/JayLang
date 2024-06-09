@@ -9,6 +9,7 @@
 void generateLocalVariables(AssemblyInfo& info, Environment* environment)
 {
 
+    info.code += "invokestatic com/example/greeting/Greeting/printGreeting()V \n";
     info.code += "return\n";
     info.code += ".localvariabletable\n";
     while (environment != nullptr) {
@@ -56,7 +57,7 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                           [&](const JJStatement& js) {
                               auto info = generateAssembly(*js.value);
                               environment.define(js.name.getLexeme(), info);
-                              auto element = environment.get(js.name.getLexeme());
+                              const auto element = environment.get(js.name.getLexeme());
                               info.code += "astore " + std::to_string(element->index) + "\n";
                               info.updateDepth(+1);
                               return info;
@@ -69,8 +70,8 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                               info.code += "L" + std::to_string(env->envindex) + ":\n";
 
                               for (const std::shared_ptr<Statement>& ptr : b.statements) {
-                                  AssemblyInfo blockInfo = generateAssembly(*ptr);
-                                  info.code += blockInfo.code;
+                                  auto [code, maxStackDepth, currentDepth, type] = generateAssembly(*ptr);
+                                  info.code += code;
                               }
 
                               info.code += "L" + std::to_string(environment.envindex + 1) + ":\n";
@@ -218,14 +219,14 @@ AssemblyInfo Compiler::generateAssembly(const Expr& expr)
                           },
                           [&](const Variable& v) -> AssemblyInfo {
                               AssemblyInfo info;
-                              auto element = environment.get(v.name.getLexeme());
+                              const auto element = environment.get(v.name.getLexeme());
                               info.code += "aload " + std::to_string(element->index) + "\n";
                               info.type = element->info.type;
                               return info;
                           },
                           [&](const Assign& a) -> AssemblyInfo {
                               AssemblyInfo info = generateAssembly(*a.value);
-                              int index = environment.assign(a.name.getLexeme(), info);
+                              const int index = environment.assign(a.name.getLexeme(), info);
                               info.code += "astore " + std::to_string(index) + "\n";
                               return info;
                           },

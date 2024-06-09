@@ -34,7 +34,7 @@ void runfile(char* path)
             std::cerr << "Compilation failed.\n";
             return;
         }
-        system((NATIVEIMAGEPATH + " -march=native Example").c_str());
+        system((NATIVEIMAGEPATH + " -cp ../jaylib/greeting-module/target/greeting.jar:. Example").c_str());
     } else {
         std::cerr << "Failed to open input file: " << path << '\n';
     }

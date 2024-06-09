@@ -52,17 +52,15 @@ enum class TokenType {
     ENDOFFILE
 };
 class Token {
-private:
     const std::string lexeme;
-
 public:
     Token(TokenType type, std::string lexeme, std::variant<double, std::string, bool, nullptr_t> literal, int line);
     const int line;
     const TokenType type;
     std::variant<double, std::string, bool, nullptr_t> literal;
-    std::string typeToString() const;
-    std::string getLexeme() const;
-    std::string toString() const;
+    [[nodiscard]] std::string typeToString() const;
+    [[nodiscard]] std::string getLexeme() const;
+    [[nodiscard]] std::string toString() const;
 };
 
 #endif // INCLUDE_INCLUDE_TOKEN_H_

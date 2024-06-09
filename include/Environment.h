@@ -23,7 +23,7 @@ public:
     std::unordered_map<std::string, EnvVariable> variables;
     void define(const std::string &name, const AssemblyInfo &info)
     {
-        EnvVariable var = { name, info, varibleCount };
+        const EnvVariable var = { name, info, varibleCount };
         if (variables.find(name) != variables.end()) {
             std::runtime_error error("Cannot redefine " + name);
             throw error;
@@ -54,7 +54,7 @@ public:
                     return curr.index;
                 }
             }
-            child  = child->child;
+            child  = child->parent;
         }
 
         std::runtime_error error("Cannot assign " + name + " does not exist");
@@ -63,7 +63,7 @@ public:
 
     std::shared_ptr<EnvVariable> get(const std::string& name)
     {
-        Environment* parent = this;
+        auto parent = this;
         while (parent != nullptr) {
             for (auto& [index, value] : variables) {
                 if (index == name) {
@@ -91,10 +91,10 @@ public:
             parent = parent->parent;
         }
 
-        for (auto& index : toRemove) {
-            index.env->variables.erase(index.name);
+        for (auto&[env, name] : toRemove) {
+            env->variables.erase(name);
         }
     }
 };
 
-#endif // INCLUDE_INCLUDE_ENVIRONMENT_H_
+#endif

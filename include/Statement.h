@@ -6,7 +6,7 @@
 class Statement {
 public:
     std::variant<ExprStatement, PrintStatement, JJStatement, Block> content;
-    Statement(std::variant<ExprStatement, PrintStatement, JJStatement, Block> content)
+    explicit Statement(std::variant<ExprStatement, PrintStatement, JJStatement, Block> content)
         : content(std::move(content))
     {
     }

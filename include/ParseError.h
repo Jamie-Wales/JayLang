@@ -5,11 +5,10 @@
 #include <stdexcept>
 #include <string>
 
-class ParseError : public std::runtime_error {
+class ParseError final : public std::runtime_error {
 public:
-    explicit ParseError(Token& token, const std::string& message)
-        : runtime_error(token.toString() + " " + message)
-    {
+    explicit ParseError(const Token &token, const std::string &message)
+        : runtime_error(token.toString() + " " + message) {
     }
 };
 
