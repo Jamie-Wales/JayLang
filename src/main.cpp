@@ -25,7 +25,7 @@ void runfile(char* path)
             linker.addCode(compiler.generateAssembly(*stmt).code);
         }
 
-        generateLocalVariables(assem, &compiler.environment);
+        compiler.generateLocalVariables(assem, compiler.environment);
         linker.addCode(assem.code);
 
         linker.writeToFile("./Example.j");

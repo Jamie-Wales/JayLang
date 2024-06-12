@@ -6,13 +6,13 @@
 #include "Statement.h"
 #include "Token.h"
 
-void generateLocalVariables(AssemblyInfo& info, Environment* environment);
-
 class Compiler {
 public:
-    Environment environment = {};
+    Environment* environment = new Environment();
     AssemblyInfo generateAssembly(const Expr& expr);
     AssemblyInfo generateAssembly(const Statement& stmt);
+    std::string localVariableTable;
+    void generateLocalVariables(AssemblyInfo& info, Environment* environment);
 
 private:
     template <class... Ts>
