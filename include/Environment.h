@@ -16,7 +16,7 @@ struct EnvVariable {
 class Environment {
 public:
     Environment() = default;
-    size_t varibleCount = 0;
+    static size_t varibleCount;
     size_t envindex = 0;
     Environment* parent = nullptr;
     Environment* child = nullptr;

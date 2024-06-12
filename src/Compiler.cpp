@@ -57,7 +57,7 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                               }
 
                               for (auto& [name, variable] : env->variables) {
-                                  localVariableTable += std::to_string(variable.index) + " is " + variable.name + " from L" + std::to_string(env->envindex) + " to L" + std::to_string(env->envindex + 1) + "\n";
+                                  localVariableTable += std::to_string(variable.index) + " is " + variable.name + "  Ljava/lang/String;" +  " from L" + std::to_string(env->envindex) + " to L" + std::to_string(env->envindex + 1) + "\n";
                               }
          info.code += "L" + std::to_string(env->envindex + 1) + ":\n";
                               this->environment = this->environment->parent;
