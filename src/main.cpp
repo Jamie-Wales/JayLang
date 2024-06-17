@@ -7,21 +7,21 @@
 #include <string>
 #include <vector>
 
-const std::string NATIVEIMAGEPATH = "/Users/jamie/Library/Java/JavaVirtualMachines/graalvm-jdk-22.0.1+8.1/Contents/Home/bin/native-image";
+const std::string NATIVEIMAGEPATH =
+        "/Users/jamie/Library/Java/JavaVirtualMachines/graalvm-jdk-22.0.1+8.1/Contents/Home/bin/native-image";
 
-void runfile(char* path)
-{
-    if (std::ifstream ifs { path }) {
+void runfile(char *path) {
+    if (std::ifstream ifs{path}) {
         std::string data((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-        Scanner scanner { data };
+        Scanner scanner{data};
         std::vector<Token> output = scanner.scanTokens();
 
-        Parser parser { output };
+        Parser parser{output};
         auto parse = parser.parse();
-        Compiler compiler {};
+        Compiler compiler{};
         AssemblyInfo assem = {};
-        Linker linker {};
-        for (auto& stmt : parse) {
+        Linker linker{};
+        for (auto &stmt: parse) {
             linker.addCode(compiler.generateAssembly(*stmt).code);
         }
 
@@ -35,22 +35,23 @@ void runfile(char* path)
             return;
         }
         system((NATIVEIMAGEPATH + " -cp ../jaylib/greeting-module/target/greeting.jar:. Example").c_str());
-    } else {
-        std::cerr << "Failed to open input file: " << path << '\n';
+        delete compiler.environment;
+        exit(EXIT_SUCCESS);
     }
+
+    std::cerr << "Failed to open input file: " << path << '\n';
     exit(EXIT_FAILURE);
 }
 
-void runPrompt()
-{
+void runPrompt() {
     std::string line = "s";
     while (true) {
         std::getline(std::cin, line);
         if (line == "\0")
             return;
-        Scanner scan { line };
+        Scanner scan{line};
         std::vector<Token> tokens = scan.scanTokens();
-        Parser parser { tokens };
+        Parser parser{tokens};
         auto expr = parser.parse();
         /*  if (parser.err.error && expr == nullptr)
             continue;
@@ -69,8 +70,7 @@ void runPrompt()
     }
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
     if (argc > 2) {
         std::cout << "Usage jj [script]" << std::endl;
         exit(EXIT_FAILURE);

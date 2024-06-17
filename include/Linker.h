@@ -1,5 +1,5 @@
-#ifndef INCLUDE_INCLUDE_LINKER_H_
-#define INCLUDE_INCLUDE_LINKER_H_
+#ifndef INCLUDE_LINKER_H_
+#define INCLUDE_LINKER_H_
 #include <fstream>
 
 class Linker {

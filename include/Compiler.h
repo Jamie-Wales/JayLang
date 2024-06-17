@@ -8,29 +8,34 @@
 
 class Compiler {
 public:
-    Environment* environment = new Environment();
-    AssemblyInfo generateAssembly(const Expr& expr);
-    AssemblyInfo generateAssembly(const Statement& stmt);
+    Environment *environment = new Environment();
+
+    AssemblyInfo generateAssembly(const Expr &expr);
+
+    AssemblyInfo generateAssembly(const Statement &stmt);
+
     std::string localVariableTable;
-    void generateLocalVariables(AssemblyInfo& info, Environment* environment);
+
+    void generateLocalVariables(AssemblyInfo &info, Environment *environment);
 
 private:
-    template <class... Ts>
+    template<class... Ts>
     struct overloaded : Ts... {
         using Ts::operator()...;
     };
-    template <class... Ts>
+
+    template<class... Ts>
     overloaded(Ts...) -> overloaded<Ts...>;
-    bool isTruthy(Expr& object);
-    void checkNumberOperands(const Token& opr, const AssemblyInfo::Type& left, const AssemblyInfo::Type& right)
-    {
+
+    bool isTruthy(Expr &object);
+
+    static void checkNumberOperands(const Token &opr, const AssemblyInfo::Type &left, const AssemblyInfo::Type &right) {
         if (left == AssemblyInfo::Type::DOUBLE && right == AssemblyInfo::Type::DOUBLE)
             return;
         throw std::runtime_error("Operands must be numbers.");
     }
 
-    void checkNumberOperand(const Token& opr, const AssemblyInfo::Type& right) const
-    {
+    static void checkNumberOperand(const Token &opr, const AssemblyInfo::Type &right) {
         if (right == AssemblyInfo::Type::DOUBLE)
             return;
         throw std::runtime_error("Operand must be a number.");

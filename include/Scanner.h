@@ -1,5 +1,5 @@
-#ifndef INCLUDE_INCLUDE_SCANNER_H_
-#define INCLUDE_INCLUDE_SCANNER_H_
+#ifndef INCLUDE_SCANNER_H_
+#define INCLUDE_SCANNER_H_
 #include "ErrorHandler.h"
 #include "Token.h"
 #include <string>
@@ -34,11 +34,11 @@ class Scanner {
 
     char peek();
 
-    char peekNext();
+    [[nodiscard]] char peekNext() const;
 
-    bool isAtEnd();
+    [[nodiscard]] bool isAtEnd() const;
 
-    bool match(char expected);
+    bool match(const char &expected);
 
     static bool isDigit(const char c) {
         return c >= '0' && c <= '9';
@@ -60,7 +60,7 @@ class Scanner {
 
     char advance();
 
-    void addToken(TokenType token, std::variant<double, std::string, bool, nullptr_t> literal);
+    void addToken(TokenType token, const std::variant<double, std::string, bool, nullptr_t> &literal);
 
     void addToken(TokenType token);
 
@@ -78,4 +78,4 @@ public:
     ErrorHandler err = {};
 };
 
-#endif // INCLUDE_INCLUDE_SCANNER_H_if;
+#endif

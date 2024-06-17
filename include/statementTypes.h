@@ -7,6 +7,8 @@
 #include <memory>
 #include <vector>
 
+class Statement;
+
 struct ExprStatement {
     std::shared_ptr<Expr> expression;
 };
@@ -20,9 +22,14 @@ struct JJStatement {
     std::shared_ptr<Expr> value;
 };
 
-class Statement;
 struct Block {
     std::vector<std::shared_ptr<Statement>> statements;
+};
+
+struct IfStatement {
+    std::shared_ptr<Expr> condition;
+    std::shared_ptr<Statement> ifBlock;
+    std::shared_ptr<Statement> elseBlock;
 };
 
 #endif // INCLUDE_INCLUDE_STATEMENTTYPES_H_

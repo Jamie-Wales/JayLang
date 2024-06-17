@@ -1,5 +1,5 @@
-#ifndef INCLUDE_INCLUDE_PARSEERROR_H_
-#define INCLUDE_INCLUDE_PARSEERROR_H_
+#ifndef INCLUDE_PARSEERROR_H_
+#define INCLUDE_PARSEERROR_H_
 
 #include "Token.h"
 #include <stdexcept>
@@ -12,4 +12,4 @@ public:
     }
 };
 
-#endif // INCLUDE_INCLUDE_PARSERERROR_H_
+#endif

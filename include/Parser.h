@@ -1,14 +1,13 @@
-#ifndef INCLUDE_INCLUDE_PARSER_H_
-#define INCLUDE_INCLUDE_PARSER_H_
+#ifndef INCLUDE_PARSER_H_
+#define INCLUDE_PARSER_H_
 #include "ErrorHandler.h"
 #include "ParseError.h"
 #include "Statement.h"
 #include "Token.h"
-#include <memory>
 
 class Parser {
 public:
-    Parser(std::vector<Token> tokens)
+    explicit Parser(std::vector<Token> tokens)
         : tokens{std::move(tokens)} {
     };
 
@@ -46,6 +45,9 @@ private:
 
     std::shared_ptr<Statement> declaration();
 
+    /* Returns null for else block if else block does not exist */
+    std::shared_ptr<Statement> ifStatement();
+
     std::shared_ptr<Statement> printStatement();
 
     std::shared_ptr<Statement> jjdeclaration();
@@ -60,7 +62,7 @@ private:
 
     Token &peek();
 
-    Token &consume() const;
+    [[nodiscard]] Token &consume() const;
 
     Token &consume(TokenType type, const std::string &message);
 
@@ -75,4 +77,4 @@ private:
     void synchronize();
 };
 
-#endif // INCLUDE_INCLUDE_PARSER_H_
+#endif

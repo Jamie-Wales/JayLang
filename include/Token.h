@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <variant>
+
 enum class TokenType {
     LEFT_PAREN,
     RIGHT_PAREN,
@@ -51,15 +52,21 @@ enum class TokenType {
     NONE,
     ENDOFFILE
 };
+
 class Token {
     const std::string lexeme;
+
 public:
     Token(TokenType type, std::string lexeme, std::variant<double, std::string, bool, nullptr_t> literal, int line);
+
     const int line;
     const TokenType type;
     std::variant<double, std::string, bool, nullptr_t> literal;
+
     [[nodiscard]] std::string typeToString() const;
+
     [[nodiscard]] std::string getLexeme() const;
+
     [[nodiscard]] std::string toString() const;
 };
 

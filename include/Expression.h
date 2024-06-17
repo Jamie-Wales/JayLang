@@ -58,18 +58,21 @@ public:
     ExprType type;
     std::variant<Unary,
         Binary, Assign, Grouping, Literal, Ternary, Variable>
-        content;
+    content;
+
     Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary, Variable> content)
         : type(type)
-        , content(std::move(content)) {};
+          , content(std::move(content)) {
+    };
 
-    Expr(Expr& expression)
-        : type { expression.type }
-        , content { std::move(expression.content) } {};
+    Expr(Expr &expression)
+        : type{expression.type}
+          , content{std::move(expression.content)} {
+    };
 
     virtual ~Expr() = default;
 };
 
-std::ostream& operator<<(std::ostream& os, const Expr& expr);
+std::ostream &operator<<(std::ostream &os, const Expr &expr);
 
 #endif // INCLUDE_INCLUDE_EXPRESSION_H_
