@@ -14,9 +14,10 @@ public:
 
     AssemblyInfo generateAssembly(const Statement &stmt);
 
+
     std::string localVariableTable;
 
-    void generateLocalVariables(AssemblyInfo &info, Environment *environment);
+    void generateLocalVariables(AssemblyInfo &info, Environment *environment) const;
 
 private:
     template<class... Ts>
@@ -40,5 +41,8 @@ private:
             return;
         throw std::runtime_error("Operand must be a number.");
     }
+
+    AssemblyInfo generateBytecode(const Binary &b);
+    AssemblyInfo generateBytecode(const Unary &b);
 };
 #endif
