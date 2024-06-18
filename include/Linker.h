@@ -4,8 +4,8 @@
 
 class Linker {
 public:
-    Linker() {
-        code = ".class public Example\n"
+    explicit Linker(const std::string &className) {
+        code = ".class public " + className + "\n"
                 ".super java/lang/Object\n"
                 ".method public static main : ([Ljava/lang/String;)V\n"
                 ".code stack 100 locals 10\n";

@@ -4,79 +4,67 @@
 #include "Scanner.h"
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 const std::string NATIVEIMAGEPATH =
         "/Users/jamie/Library/Java/JavaVirtualMachines/graalvm-jdk-22.0.1+8.1/Contents/Home/bin/native-image";
 
-void runfile(char *path) {
-    if (std::ifstream ifs{path}) {
-        std::string data((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-        Scanner scanner{data};
-        std::vector<Token> output = scanner.scanTokens();
-
-        Parser parser{output};
-        auto parse = parser.parse();
-        Compiler compiler{};
-        AssemblyInfo assem = {};
-        Linker linker{};
-        for (auto &stmt: parse) {
-            linker.addCode(compiler.generateAssembly(*stmt).code);
-        }
-
-        compiler.generateLocalVariables(assem, compiler.environment);
-        linker.addCode(assem.code);
-
-        linker.writeToFile("./Example.j");
-        std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ Example.j";
-        if (system(compileCommand.c_str()) != 0) {
-            std::cerr << "Compilation failed.\n";
-            return;
-        }
-        system((NATIVEIMAGEPATH + " -cp ../jaylib/target/JayLib-0.1.jar:. Example").c_str());
-        delete compiler.environment;
-        exit(EXIT_SUCCESS);
+void runfile(const std::string &path) {
+    if (!std::filesystem::path(path).has_extension() || std::filesystem::path(path).extension() != ".jay") {
+        std::cerr << "Error: Only .jay files are supported." << std::endl;
+        exit(EXIT_FAILURE);
     }
 
-    std::cerr << "Failed to open input file: " << path << '\n';
-    exit(EXIT_FAILURE);
-}
-
-void runPrompt() {
-    std::string line = "s";
-    while (true) {
-        std::getline(std::cin, line);
-        if (line == "\0")
-            return;
-        Scanner scan{line};
-        std::vector<Token> tokens = scan.scanTokens();
-        Parser parser{tokens};
-        auto expr = parser.parse();
-        /*  if (parser.err.error && expr == nullptr)
-            continue;
-
-        Compiler compiler {};
-        writeToFile(compiler.generateAssembly(*expr), "./example.j");
-*/
-        std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ ./example.j";
-        if (system(compileCommand.c_str()) != 0) {
-            std::cerr << "Compilation failed.\n";
-            return;
-        }
-
-        std::remove("./example.j");
-        std::remove("./Example.class");
+    std::ifstream ifs{path};
+    if (!ifs) {
+        std::cerr << "Failed to open input file: " << path << '\n';
+        exit(EXIT_FAILURE);
     }
+
+    std::string data((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    Scanner scanner{data};
+    std::vector<Token> output = scanner.scanTokens();
+    std::string baseName = std::filesystem::path(path).stem().string();
+
+    Parser parser{output};
+    auto parse = parser.parse();
+    Compiler compiler{};
+    AssemblyInfo assem = {};
+    Linker linker{baseName};
+    for (auto &stmt: parse) {
+        linker.addCode(compiler.generateAssembly(*stmt).code);
+    }
+
+    compiler.generateLocalVariables(assem, compiler.environment);
+    linker.addCode(assem.code);
+
+    std::string asmFileName = "./" + baseName + ".j";
+    std::string classFileName = baseName;
+
+    linker.writeToFile(asmFileName);
+    std::string compileCommand = "../libs/Krakatau/target/release/krak2 asm --out ./ " + asmFileName;
+    if (system(compileCommand.c_str()) != 0) {
+        std::cerr << "Compilation failed.\n";
+        return;
+    }
+
+    std::string nativeImageCommand = NATIVEIMAGEPATH + " -cp ../jaylib/target/JayLib-0.1.jar:. " + baseName;
+    if (system(nativeImageCommand.c_str()) != 0) {
+        std::cerr << "Native image generation failed.\n";
+        return;
+    }
+
+    delete compiler.environment;
+    exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc > 2) {
-        std::cout << "Usage jj [script]" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: jj [script.jay]" << std::endl;
         exit(EXIT_FAILURE);
-    } else if (argc == 2) {
-        runfile(argv[1]);
-    } else {
-        runPrompt();
     }
+    runfile(argv[1]);
 }

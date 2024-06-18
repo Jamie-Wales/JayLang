@@ -14,7 +14,6 @@ public:
 
     AssemblyInfo generateAssembly(const Statement &stmt);
 
-
     std::string localVariableTable;
 
     void generateLocalVariables(AssemblyInfo &info, Environment *environment) const;
@@ -43,6 +42,7 @@ private:
     }
 
     AssemblyInfo generateBytecode(const Binary &b);
+
     AssemblyInfo generateBytecode(const Unary &b);
 };
 #endif

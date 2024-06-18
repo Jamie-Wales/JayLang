@@ -198,9 +198,6 @@ AssemblyInfo Compiler::generateAssembly(const Expr &expr) {
                                                  info.code += "ldc2_w 42.0\n";
                                                  info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
                                                  info.code += "invokespecial Types/JayObject/<init>(LTypes/Type;Ljava/lang/Object;)V\n";
-                                                 info.code += "astore_0\n";
-                                                 info.code += "aload_0\n";
-                                                 info.code += "invokevirtual Types/JayObject/print()V\n";
                                                  info.updateDepth(2);
                                                  info.type = AssemblyInfo::Type::DOUBLE;
                                              },
