@@ -88,18 +88,17 @@ char Scanner::advance() {
     return source.at(current++);
 }
 
-void Scanner::addToken(TokenType token, const std::variant<double, std::string, bool, nullptr_t> &literal) {
+void Scanner::addToken(const TokenType token, const std::variant<double, std::string, bool, nullptr_t> &literal) {
     std::string text = source.substr(start, current - start);
     tokens.emplace_back(token, text, literal, static_cast<int>(line));
 }
 
-void Scanner::addToken(TokenType token) {
+void Scanner::addToken(const TokenType token) {
     addToken(token, nullptr);
 }
 
 void Scanner::scanToken() {
-    char c = advance();
-    switch (c) {
+    switch (const char c = advance()) {
         case '(':
             addToken(TokenType::LEFT_PAREN);
             break;

@@ -1,5 +1,4 @@
-#ifndef INCLUDE_SCANNER_H_
-#define INCLUDE_SCANNER_H_
+#pragma once
 #include "ErrorHandler.h"
 #include "Token.h"
 #include <string>
@@ -23,7 +22,7 @@ class Scanner {
         {"if", TokenType::IF},
         {"nil", TokenType::NIL},
         {"or", TokenType::OR},
-        {"lg", TokenType::PRINT},
+        {"log", TokenType::LOG},
         {"return", TokenType::RETURN},
         {"super", TokenType::SUPER},
         {"this", TokenType::THIS},
@@ -77,5 +76,3 @@ public:
 
     ErrorHandler err = {};
 };
-
-#endif
