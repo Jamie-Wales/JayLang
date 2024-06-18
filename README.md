@@ -1,6 +1,6 @@
 # JayLang
 
-![Header Image](images/header.png)
+![Header Image](JayLang a progr.png)
 
 JayLang is a student compiler project for a custom scripting language that translates source code into Java bytecode and executes it using the GraalVM native image tool.
 
