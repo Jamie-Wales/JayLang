@@ -1,5 +1,4 @@
-#ifndef INCLUDE_PARSER_H_
-#define INCLUDE_PARSER_H_
+#pragma once
 #include "ErrorHandler.h"
 #include "ParseError.h"
 #include "Statement.h"
@@ -77,4 +76,3 @@ private:
     void synchronize();
 };
 
-#endif

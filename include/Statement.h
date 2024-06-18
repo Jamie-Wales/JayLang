@@ -1,6 +1,4 @@
-#ifndef INCLUDE_STATEMENT_H_
-#define INCLUDE_STATEMENT_H_
-
+#pragma once
 #include "statementTypes.h"
 #include <variant>
 
@@ -12,5 +10,3 @@ public:
         : content(std::move(content)) {
     }
 };
-
-#endif

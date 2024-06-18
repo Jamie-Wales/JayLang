@@ -1,5 +1,4 @@
-#ifndef INCLUDE_COMPILER_H
-#define INCLUDE_COMPILER_H
+#pragma once
 #include "AssemblyInfo.h"
 #include "Environment.h"
 #include "Expression.h"
@@ -27,16 +26,16 @@ private:
     template<class... Ts>
     overloaded(Ts...) -> overloaded<Ts...>;
 
-    bool isTruthy(Expr &object);
+    static bool isTruthy(const Expr &object);
 
     static void checkNumberOperands(const Token &opr, const AssemblyInfo::Type &left, const AssemblyInfo::Type &right) {
-        if (left == AssemblyInfo::Type::DOUBLE && right == AssemblyInfo::Type::DOUBLE)
+        if (left == AssemblyInfo::Type::DECIMAL && right == AssemblyInfo::Type::DECIMAL)
             return;
         throw std::runtime_error("Operands must be numbers.");
     }
 
     static void checkNumberOperand(const Token &opr, const AssemblyInfo::Type &right) {
-        if (right == AssemblyInfo::Type::DOUBLE)
+        if (right == AssemblyInfo::Type::DECIMAL)
             return;
         throw std::runtime_error("Operand must be a number.");
     }
@@ -45,4 +44,3 @@ private:
 
     AssemblyInfo generateBytecode(const Unary &b);
 };
-#endif

@@ -66,7 +66,8 @@ std::shared_ptr<Expr> Parser::assignment() {
 }
 
 std::shared_ptr<Statement> Parser::statement() {
-    if (match({TokenType::PRINT}))
+    if (match({TokenType::LOG}))
+
         return printStatement();
     if (match({TokenType::LEFT_BRACE}))
         return blockStatement();
@@ -268,7 +269,7 @@ void Parser::synchronize() {
             case TokenType::FOR:
             case TokenType::IF:
             case TokenType::WHILE:
-            case TokenType::PRINT:
+            case TokenType::LOG:
             case TokenType::RETURN:
                 return;
         }

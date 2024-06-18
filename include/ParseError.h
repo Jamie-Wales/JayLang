@@ -1,6 +1,4 @@
-#ifndef INCLUDE_PARSEERROR_H_
-#define INCLUDE_PARSEERROR_H_
-
+#pragma once
 #include "Token.h"
 #include <stdexcept>
 #include <string>
@@ -11,5 +9,3 @@ public:
         : runtime_error(token.toString() + " " + message) {
     }
 };
-
-#endif
