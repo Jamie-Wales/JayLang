@@ -1,6 +1,10 @@
 package Types;
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
 public interface JayType {
+
     boolean greaterThan(JayObject<?> object);
 
     boolean greaterThanEqual(JayObject<?> object);
@@ -13,4 +17,6 @@ public interface JayType {
 
     boolean notEqual(JayObject<?> object);
 
+    boolean equals(Object obj);
 }
+
