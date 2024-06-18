@@ -34,7 +34,7 @@ void runfile(char *path) {
             std::cerr << "Compilation failed.\n";
             return;
         }
-        system((NATIVEIMAGEPATH + " -cp ../jaylib/greeting-module/target/greeting.jar:. Example").c_str());
+        system((NATIVEIMAGEPATH + " -cp ../jaylib/target/JayLib-0.1.jar:. Example").c_str());
         delete compiler.environment;
         exit(EXIT_SUCCESS);
     }

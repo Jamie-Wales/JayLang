@@ -114,7 +114,6 @@ AssemblyInfo Compiler::generateBytecode(const Unary &u) {
 }
 
 void Compiler::generateLocalVariables(AssemblyInfo &info, [[maybe_unused]] Environment *environment) const {
-    info.code += "invokestatic com/example/greeting/Greeting/printGreeting()V \n";
     info.code += "return\n";
     info.code += ".localvariabletable\n";
     info.code += this->localVariableTable;
@@ -192,9 +191,16 @@ AssemblyInfo Compiler::generateAssembly(const Expr &expr) {
                               AssemblyInfo info;
                               std::visit(overloaded{
                                              [&](const double &d) {
-                                                 info.code = "ldc2_w " + std::to_string(d) + "\n";
-                                                 info.code +=
-                                                         "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
+
+                                                 info.code += "new Types/JayObject\n";
+                                                 info.code += "dup\n";
+                                                 info.code += "getstatic Types/Type/DECIMAL LTypes/Type;\n";
+                                                 info.code += "ldc2_w 42.0\n";
+                                                 info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
+                                                 info.code += "invokespecial Types/JayObject/<init>(LTypes/Type;Ljava/lang/Object;)V\n";
+                                                 info.code += "astore_0\n";
+                                                 info.code += "aload_0\n";
+                                                 info.code += "invokevirtual Types/JayObject/print()V\n";
                                                  info.updateDepth(2);
                                                  info.type = AssemblyInfo::Type::DOUBLE;
                                              },

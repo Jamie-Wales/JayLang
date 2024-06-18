@@ -2,22 +2,19 @@ package Types;
 
 import java.math.BigDecimal;
 
-
 public class JayObject<T> implements JayType {
     public JayObject(Type type, T value) {
         this.type = type;
         this.value = value;
     }
 
-
     Type type;
     private T value;
-
 
     public boolean compare(JayObject<T> compare) {
         switch (compare.type) {
             case DECIMAL -> {
-               return  compare((BigDecimal) compare.value);
+                return compare((BigDecimal) compare.value);
             }
             case STRING -> {
                 return compare((String) compare.value);
@@ -56,5 +53,7 @@ public class JayObject<T> implements JayType {
         throw new RuntimeException("Invalid Type");
     }
 
-
+    public void print() {
+        System.out.println("Hello, I am a Jay Object");
+    }
 }
