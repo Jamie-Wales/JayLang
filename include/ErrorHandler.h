@@ -1,5 +1,4 @@
-#ifndef INCLUDE_INCLUDE_ERRORHANDLER_H_
-#define INCLUDE_INCLUDE_ERRORHANDLER_H_
+#pragma once
 #include <iostream>
 
 class ErrorHandler {
@@ -15,4 +14,3 @@ public:
         error = true;
     }
 };
-#endif // INCLUDE_INCLUDE_ERRORHANDLER_H_

@@ -1,3 +1,0 @@
-module JayLib {
-    exports Types;
-}

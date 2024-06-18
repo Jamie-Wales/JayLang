@@ -9,89 +9,63 @@
 
 
 auto Compiler::generateBytecode(const Binary &b) -> AssemblyInfo {
+    AssemblyInfo info;
     auto leftInfo = generateAssembly(*b.left);
     auto rightInfo = generateAssembly(*b.right);
-    AssemblyInfo info;
+    info.code += leftInfo.code;
+    info.code += rightInfo.code;
     switch (b.opr.type) {
         case TokenType::GREATER:
+            checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
+            info.code += "invokevirtual Types/JayObject/greaterThan(LTypes/JayObject;)Z\n";
+            break;
         case TokenType::GREATER_EQUAL:
             checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-            info.code += leftInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += rightInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += "dcmpg\n";
+            info.code += "invokevirtual Types/JayObject/greaterThanEqual(LTypes/JayObject;)Z\n";
             break;
         case TokenType::LESS:
         case TokenType::LESS_EQUAL:
             checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
             info.code += leftInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += rightInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += "dcmpl\n";
+            info.code += "invokevirtual java/math/BigDecimal/compareTo(Ljava/math/BigDecimal;)I\n";
             break;
         case TokenType::MINUS:
             checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
             info.code += leftInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += rightInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += "dsub\n";
-            info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
-            info.type = AssemblyInfo::Type::DOUBLE;
+            info.code += "invokevirtual java/math/BigDecimal/subtract(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;\n";
+            info.type = AssemblyInfo::Type::DECIMAL;
             break;
         case TokenType::SLASH:
             checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-            info.code += leftInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += rightInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += "ddiv\n";
-            info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
-            info.type = AssemblyInfo::Type::DOUBLE;
+            info.code += "invokevirtual java/math/BigDecimal/divide(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;\n";
+            info.type = AssemblyInfo::Type::DECIMAL;
             break;
         case TokenType::STAR:
             checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-            info.code += leftInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += rightInfo.code;
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += "dmul\n";
-            info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
-            info.type = AssemblyInfo::Type::DOUBLE;
+            info.code += "invokevirtual java/math/BigDecimal/multiply(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;\n";
+            info.type = AssemblyInfo::Type::DECIMAL;
             break;
         case TokenType::PLUS:
-            if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type ==
-                AssemblyInfo::Type::DOUBLE) {
-                info.code += leftInfo.code;
-                info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-                info.code += rightInfo.code;
-                info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-                info.code += "dadd\n";
-                info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
-                info.type = AssemblyInfo::Type::DOUBLE;
-            } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type ==
-                       AssemblyInfo::Type::STRING) {
+            if (leftInfo.type == AssemblyInfo::Type::DECIMAL && rightInfo.type == AssemblyInfo::Type::DECIMAL) {
+                info.code += "invokevirtual java/math/BigDecimal/add(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;\n";
+                info.type = AssemblyInfo::Type::DECIMAL;
+            } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::STRING) {
                 info.code += leftInfo.code + rightInfo.code +
                         "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
                 info.type = AssemblyInfo::Type::STRING;
             } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type ==
-                       AssemblyInfo::Type::DOUBLE) {
-                info.code += leftInfo.code;
-                info.code += rightInfo.code;
-                info.code += "invokevirtual java/lang/Double/toString()Ljava/lang/String;\n";
-                info.code +=
-                        "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
+                       AssemblyInfo::Type::DECIMAL) {
+                info.code += "invokevirtual java/math/BigDecimal/toString()Ljava/lang/String;\n";
+                info.code += "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
                 info.type = AssemblyInfo::Type::STRING;
-            } else if (leftInfo.type == AssemblyInfo::Type::DOUBLE && rightInfo.type ==
+            } else if (leftInfo.type == AssemblyInfo::Type::DECIMAL && rightInfo.type ==
                        AssemblyInfo::Type::STRING) {
-                info.code += leftInfo.code +
-                        "invokevirtual java/lang/Double/toString()Ljava/lang/String;\n";
-                info.code += rightInfo.code +
-                        "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
+                info.code += "swap\n";
+                info.code += "invokevirtual java/math/BigDecimal/toString()Ljava/lang/String;\n";
+                info.code += "swap\n";
+                info.code += "invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;\n";
                 info.type = AssemblyInfo::Type::STRING;
-            };
+            }
             break;
     }
     return info;
@@ -102,9 +76,7 @@ AssemblyInfo Compiler::generateBytecode(const Unary &u) {
     switch (u.opr.type) {
         case TokenType::MINUS:
             checkNumberOperand(u.opr, info.type);
-            info.code += "invokevirtual java/lang/Double/doubleValue()D\n";
-            info.code += "dneg\n";
-            info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
+            info.code += "invokevirtual java/math/BigDecimal/negate()Ljava/math/BigDecimal;\n";
             break;
         case TokenType::BANG:
             isTruthy(*u.value) ? info.code += "iconst_0\n" : info.code += "iconst_1\n";
@@ -128,8 +100,8 @@ AssemblyInfo Compiler::generateAssembly(const Statement &stmt) {
                               auto exprInfo = generateAssembly(*(ps.expression));
                               info.code += exprInfo.code;
                               info.type = exprInfo.type;
-                              if (info.type == AssemblyInfo::Type::DOUBLE) {
-                                  info.code += "invokevirtual java/lang/Double/toString()Ljava/lang/String;\n";
+                              if (info.type == AssemblyInfo::Type::DECIMAL) {
+                                  info.code += "invokevirtual java/math/BigDecimal/toString()Ljava/lang/String;\n";
                               } else if (info.type == AssemblyInfo::Type::BOOL) {
                                   info.code += "invokestatic java/lang/Boolean/toString()Ljava/lang/String;\n";
                               }
@@ -174,7 +146,7 @@ AssemblyInfo Compiler::generateAssembly(const Statement &stmt) {
                               const auto info = generateAssembly(*i.condition);
                               const auto ifBlock = generateAssembly(*i.ifBlock);
                               const auto elseBlock = i.elseBlock != nullptr
-                                                         ? generateAssembly(*i.ifBlock)
+                                                         ? generateAssembly(*i.elseBlock)
                                                          : AssemblyInfo{};
                               return info;
                           },
@@ -191,15 +163,11 @@ AssemblyInfo Compiler::generateAssembly(const Expr &expr) {
                               AssemblyInfo info;
                               std::visit(overloaded{
                                              [&](const double &d) {
-
-                                                 info.code += "new Types/JayObject\n";
-                                                 info.code += "dup\n";
-                                                 info.code += "getstatic Types/Type/DECIMAL LTypes/Type;\n";
-                                                 info.code += "ldc2_w 42.0\n";
-                                                 info.code += "invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double;\n";
-                                                 info.code += "invokespecial Types/JayObject/<init>(LTypes/Type;Ljava/lang/Object;)V\n";
+                                                 info.code += "ldc2_w " + std::to_string(d) + "\n";
+                                                 info.code +=
+                                                         "invokestatic java/math/BigDecimal/valueOf(D)Ljava/math/BigDecimal;\n";
                                                  info.updateDepth(2);
-                                                 info.type = AssemblyInfo::Type::DOUBLE;
+                                                 info.type = AssemblyInfo::Type::DECIMAL;
                                              },
                                              [&](const std::string &s) {
                                                  info.code = "ldc " + s + "\n";
@@ -251,9 +219,9 @@ AssemblyInfo Compiler::generateAssembly(const Expr &expr) {
                       expr.content);
 }
 
-bool Compiler::isTruthy(Expr &object) {
+bool Compiler::isTruthy(const Expr &object) {
     if (std::holds_alternative<Literal>(object.content)) {
-        Literal l = std::get<Literal>(object.content);
+        const auto l = std::get<Literal>(object.content);
         if (std::holds_alternative<nullptr_t>(l.literal))
             return false;
         if (std::holds_alternative<bool>(l.literal))

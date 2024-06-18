@@ -1,6 +1,4 @@
-#ifndef INCLUDE_INCLUDE_ASSEMBLYINFO_H_
-#define INCLUDE_INCLUDE_ASSEMBLYINFO_H_
-
+#pragma once
 #include <string>
 
 struct AssemblyInfo {
@@ -9,7 +7,7 @@ struct AssemblyInfo {
     size_t currentDepth = 0;
 
     enum class Type {
-        DOUBLE,
+        DECIMAL,
         STRING,
         BOOL,
         NULL_T,
@@ -20,7 +18,7 @@ struct AssemblyInfo {
 
     Type type;
 
-    void updateDepth(size_t depthNeeded) {
+    void updateDepth(const size_t depthNeeded) {
         currentDepth += depthNeeded;
         if (currentDepth > maxStackDepth) {
             maxStackDepth = currentDepth;
@@ -35,5 +33,3 @@ struct AssemblyInfo {
         }
     }
 };
-
-#endif // INCLUDE_INCLUDE_ASSEMBLYINFO_H_

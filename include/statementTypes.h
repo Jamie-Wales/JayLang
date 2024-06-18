@@ -1,10 +1,5 @@
-
-
-#ifndef INCLUDE_STATEMENTTYPES_H_
-#define INCLUDE_STATEMENTTYPES_H_
-
+#pragma once
 #include "Expression.h"
-#include <memory>
 #include <vector>
 
 class Statement;
@@ -23,7 +18,7 @@ struct JJStatement {
 };
 
 struct Block {
-    std::vector<std::shared_ptr<Statement>> statements;
+    std::vector<std::shared_ptr<Statement> > statements;
 };
 
 struct IfStatement {
@@ -31,5 +26,3 @@ struct IfStatement {
     std::shared_ptr<Statement> ifBlock;
     std::shared_ptr<Statement> elseBlock;
 };
-
-#endif // INCLUDE_INCLUDE_STATEMENTTYPES_H_

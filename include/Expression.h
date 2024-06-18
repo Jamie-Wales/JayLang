@@ -1,6 +1,4 @@
-#ifndef INCLUDE_INCLUDE_EXPRESSION_H_
-#define INCLUDE_INCLUDE_EXPRESSION_H_
-
+#pragma once
 #include "Token.h"
 #include <iostream>
 #include <memory>
@@ -74,5 +72,3 @@ public:
 };
 
 std::ostream &operator<<(std::ostream &os, const Expr &expr);
-
-#endif // INCLUDE_INCLUDE_EXPRESSION_H_

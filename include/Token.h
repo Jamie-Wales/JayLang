@@ -1,5 +1,4 @@
-#ifndef INCLUDE_INCLUDE_TOKEN_H_
-#define INCLUDE_INCLUDE_TOKEN_H_
+#pragma once
 #include <cstddef>
 #include <string>
 #include <variant>
@@ -41,7 +40,7 @@ enum class TokenType {
     IF,
     NIL,
     OR,
-    PRINT,
+    LOG,
     RETURN,
     SUPER,
     THIS,
@@ -69,5 +68,3 @@ public:
 
     [[nodiscard]] std::string toString() const;
 };
-
-#endif // INCLUDE_INCLUDE_TOKEN_H_
