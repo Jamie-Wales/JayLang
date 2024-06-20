@@ -1,1 +1,2 @@
-log 5+"Abc";
+jj a = "Jamie is cool";
+log a - "Jamie";
