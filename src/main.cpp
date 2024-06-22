@@ -3,39 +3,38 @@
 #include "Parser.h"
 #include "Scanner.h"
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <filesystem>
 
-const std::string NATIVEIMAGEPATH =
-    "/Users/jamie/Library/Java/JavaVirtualMachines/graalvm-jdk-22.0.1+8.1/Contents/Home/bin/native-image";
+const std::string NATIVEIMAGEPATH = "/Users/jamie/Library/Java/JavaVirtualMachines/graalvm-jdk-22.0.1+8.1/Contents/Home/bin/native-image";
 
-void runfile(const std::string &path) {
+void runfile(const std::string& path)
+{
     if (!std::filesystem::path(path).has_extension() || std::filesystem::path(path).extension() != ".jay") {
         std::cerr << "Error: Only .jay files are supported." << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    std::ifstream ifs{path};
+    std::ifstream ifs { path };
     if (!ifs) {
         std::cerr << "Failed to open input file: " << path << '\n';
         exit(EXIT_FAILURE);
     }
 
-
     std::string baseName = std::filesystem::path(path).stem().string();
     std::string data((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-    Scanner scanner{data};
+    Scanner scanner { data };
     std::vector<Token> output = scanner.scanTokens();
 
-    Parser parser{output};
+    Parser parser { output };
     auto parse = parser.parse();
-    Compiler compiler{};
+    Compiler compiler {};
     AssemblyInfo assem = {};
-    Linker linker{baseName};
-    for (auto &stmt: parse) {
+    Linker linker { baseName };
+    for (auto& stmt : parse) {
         linker.addCode(compiler.generateAssembly(*stmt).code);
     }
 
@@ -67,7 +66,8 @@ void runfile(const std::string &path) {
     exit(EXIT_SUCCESS);
 }
 
-int main(const int argc, char *argv[]) {
+int main(const int argc, char* argv[])
+{
     if (argc != 2) {
         std::cout << "Usage: jj [script.jay]" << std::endl;
         exit(EXIT_FAILURE);

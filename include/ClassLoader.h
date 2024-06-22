@@ -9,14 +9,15 @@ public:
 
     std::string writer;
 
-    void addClass(const std::string &className) {
+    void addClass(const std::string& className)
+    {
         classes[className] = "";
     }
 
-    void loadClass(const std::string &loader) {
+    void loadClass(const std::string& loader)
+    {
         writer = classes[loader];
     }
-
 
 private:
     std::unordered_map<std::string, std::string> classes;

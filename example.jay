@@ -1,2 +1,6 @@
-jj a = "Jamie is cool";
-log a - "Jamie";
+if (10 <  20) {
+    log "jamie";
+} else {
+    log "wales";
+}
+

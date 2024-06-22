@@ -23,6 +23,7 @@ auto Compiler::generateBytecode(const Binary& b) -> AssemblyInfo
         break;
     case TokenType::LESS:
         info.code += "invokevirtual Types/JayObject/lessThan(LTypes/JayObject;)Z\n";
+        break;
     case TokenType::LESS_EQUAL:
         info.code += "invokevirtual Types/JayObject/lessThanEqual(LTypes/JayObject;)Z\n";
         break;
@@ -120,17 +121,26 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                               for (auto& [name, variable] : env->variables) {
                                   localVariableTable += std::to_string(variable.index) + " is " + variable.name + "  Ljava/lang/String;" + " from L" + std::to_string(env->envindex) + " to L" + std::to_string(env->envindex + 1) + "\n";
                               }
-                              info.code += "L" + std::to_string(env->envindex + 1) + ":\n";
+                              info.code += "L" + std::to_string(++env->envindex) + ":\n";
                               this->environment = this->environment->parent;
                               delete this->environment->child;
                               return info;
                           },
                           [&](const IfStatement& i) -> AssemblyInfo {
-                              const auto info = generateAssembly(*i.condition);
-                              const auto ifBlock = generateAssembly(*i.ifBlock);
-                              const auto elseBlock = i.elseBlock != nullptr
-                                  ? generateAssembly(*i.elseBlock)
-                                  : AssemblyInfo {};
+                              auto info = generateAssembly(*i.condition);
+                              if (i.elseBlock == nullptr) {
+                                  info.code += "ifne L" + std::to_string(environment->envindex + 1) + "\n";
+                                  info.code += "goto L" + std::to_string(environment->envindex + 2) + "\n";
+                                  auto ifBlock = generateAssembly(*i.ifBlock);
+                                  info.code += ifBlock.code;
+                              } else {
+                                  info.code += "ifne L" + std::to_string(environment->envindex + 3) + "\n";
+                                  info.code += "goto L" + std::to_string(environment->envindex + 4) + "\n";
+                                  auto elseBlock = generateAssembly(*i.elseBlock);
+                                  info.code += elseBlock.code;
+                                  auto ifBlock = generateAssembly(*i.ifBlock);
+                                  info.code += ifBlock.code;
+                              }
                               return info;
                           },
                           [&](auto&) {
