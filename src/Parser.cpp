@@ -54,7 +54,7 @@ std::shared_ptr<Statement> Parser::expressionStatement()
 
 std::shared_ptr<Expr> Parser::assignment()
 {
-    auto expr = comma();
+    auto expr = logicalOR();
 
     if (match({ TokenType::EQUAL })) {
         Token equals = previous();
@@ -119,11 +119,35 @@ std::shared_ptr<Expr> Parser::expression()
 
 std::shared_ptr<Expr> Parser::comma()
 {
-    auto expr = ternary();
+    auto expr = logicalOR();
     while (match({ TokenType::COMMA })) {
         auto opr = previous();
+        const auto right = logicalOR();
+        expr = std::make_shared<Expr>(ExprType::LOGICAL, Logical { expr, opr, right });
+    }
+
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::logicalOR()
+{
+    auto expr = logicalAND();
+    while (match({ TokenType::OR })) {
+        auto opr = previous();
+        const auto right = logicalAND();
+        expr = std::make_shared<Expr>(ExprType::LOGICAL, Logical { expr, opr, right });
+    }
+
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::logicalAND()
+{
+    auto expr = ternary();
+    while (match({ TokenType::AND })) {
+        auto opr = previous();
         const auto right = ternary();
-        expr = std::make_shared<Expr>(ExprType::BINARY, Binary { expr, opr, right });
+        expr = std::make_shared<Expr>(ExprType::LOGICAL, Logical { expr, opr, right });
     }
 
     return expr;
@@ -141,16 +165,6 @@ std::shared_ptr<Expr> Parser::ternary()
     }
 
     return condition;
-}
-
-std::shared_ptr<Expr> Parser::logicalOR()
-{
-    std::cout << "OR" << std::endl;
-}
-
-std::shared_ptr<Expr> Parser::logicalAND()
-{
-    std::cout << "AND" << std::endl;
 }
 
 std::shared_ptr<Expr> Parser::equality()

@@ -185,6 +185,10 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
                               auto info = generateAssembly(*g.expression);
                               return info;
                           },
+                          [&](const Logical& l) -> AssemblyInfo {
+                              std::cout << "logical parsed" << std::endl;
+                              return {};
+                          },
                           [&](const Unary& u) -> AssemblyInfo {
                               return generateBytecode(u);
                           },
