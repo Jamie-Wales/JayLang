@@ -1,4 +1,4 @@
-if (10 <  20) {
+if (10 >  20) {
     log "jamie";
 } else {
     log "wales";

@@ -7,6 +7,7 @@
 enum class ExprType {
     LITERAL,
     UNARY,
+    LOGICAL,
     BINARY,
     GROUPING,
     TERNARY,
@@ -51,24 +52,28 @@ struct Variable {
     std::shared_ptr<Expr> value;
 };
 
+struct Logical {
+    std::shared_ptr<Expr> left;
+    const Token token;
+    std::shared_ptr<Expr> right;
+};
+
 class Expr {
 public:
     ExprType type;
     std::variant<Unary,
-        Binary, Assign, Grouping, Literal, Ternary, Variable>
-    content;
+        Binary, Assign, Grouping, Literal, Ternary, Variable, Logical>
+        content;
 
-    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary, Variable> content)
+    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary, Variable, Logical> content)
         : type(type)
-          , content(std::move(content)) {
-    };
+        , content(std::move(content)) {};
 
-    Expr(Expr &expression)
-        : type{expression.type}
-          , content{std::move(expression.content)} {
-    };
+    Expr(Expr& expression)
+        : type { expression.type }
+        , content { std::move(expression.content) } {};
 
     virtual ~Expr() = default;
 };
 
-std::ostream &operator<<(std::ostream &os, const Expr &expr);
+std::ostream& operator<<(std::ostream& os, const Expr& expr);

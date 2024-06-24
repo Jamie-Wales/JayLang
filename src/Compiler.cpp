@@ -59,7 +59,7 @@ auto Compiler::generateBytecode(const Binary& b) -> AssemblyInfo
     return info;
 }
 
-AssemblyInfo Compiler::generateBytecode(const Unary& u)
+auto Compiler::generateBytecode(const Unary& u) -> AssemblyInfo
 {
     auto info = generateAssembly(*u.value);
     switch (u.opr.type) {
@@ -74,7 +74,7 @@ AssemblyInfo Compiler::generateBytecode(const Unary& u)
     return info;
 }
 
-void Compiler::generateLocalVariables(AssemblyInfo& info, [[maybe_unused]] Environment* environment) const
+auto Compiler::generateLocalVariables(AssemblyInfo& info, [[maybe_unused]] Environment* environment) const -> void
 {
     info.code += "return\n";
     info.code += ".localvariabletable\n";
@@ -82,7 +82,7 @@ void Compiler::generateLocalVariables(AssemblyInfo& info, [[maybe_unused]] Envir
     info.code += ".end localvariabletable\n";
 }
 
-AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
+auto Compiler::generateAssembly(const Statement& stmt) -> AssemblyInfo
 {
     return std::visit(overloaded {
                           [&](const PrintStatement& ps) {
@@ -135,9 +135,9 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
                                   info.code += ifBlock.code;
                               } else {
                                   info.code += "ifne L" + std::to_string(environment->envindex + 3) + "\n";
-                                  info.code += "goto L" + std::to_string(environment->envindex + 4) + "\n";
                                   auto elseBlock = generateAssembly(*i.elseBlock);
                                   info.code += elseBlock.code;
+                                  info.code += "goto L" + std::to_string(environment->envindex + 2) + "\n";
                                   auto ifBlock = generateAssembly(*i.ifBlock);
                                   info.code += ifBlock.code;
                               }
@@ -149,7 +149,7 @@ AssemblyInfo Compiler::generateAssembly(const Statement& stmt)
         stmt.content);
 };
 
-AssemblyInfo Compiler::generateAssembly(const Expr& expr)
+auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
 {
     return std::visit(overloaded {
                           [&](const Literal& l) -> AssemblyInfo {
@@ -210,7 +210,7 @@ AssemblyInfo Compiler::generateAssembly(const Expr& expr)
         expr.content);
 }
 
-bool Compiler::isTruthy(const Expr& object)
+auto Compiler::isTruthy(const Expr& object) -> bool
 {
     if (std::holds_alternative<Literal>(object.content)) {
         const auto l = std::get<Literal>(object.content);
@@ -219,5 +219,6 @@ bool Compiler::isTruthy(const Expr& object)
         if (std::holds_alternative<bool>(l.literal))
             return std::get<bool>(l.literal);
     }
+
     return true;
 }

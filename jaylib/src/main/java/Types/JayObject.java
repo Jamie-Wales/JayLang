@@ -91,7 +91,8 @@ public class JayObject<T> implements JayType {
             case DECIMAL:
                 switch (mul.type) {
                     case DECIMAL:
-                        return new JayObject<>(Type.DECIMAL, ((BigDecimal) this.value).multiply((BigDecimal) mul.value));
+                        return new JayObject<>(Type.DECIMAL,
+                                ((BigDecimal) this.value).multiply((BigDecimal) mul.value));
                     case STRING:
                         int times = ((BigDecimal) this.value).intValue();
                         StringBuilder result = new StringBuilder();

@@ -7,8 +7,7 @@
 class Parser {
 public:
     explicit Parser(std::vector<Token> tokens)
-        : tokens{std::move(tokens)} {
-    };
+        : tokens { std::move(tokens) } {};
 
     std::vector<std::shared_ptr<Statement> > parse();
 
@@ -16,9 +15,13 @@ public:
     size_t current = 0;
 
 private:
-    ParseError error(Token &token, const std::string &message);
+    ParseError error(Token& token, const std::string& message);
 
     std::vector<Token> tokens;
+
+    std::shared_ptr<Expr> logicalOR();
+
+    std::shared_ptr<Expr> logicalAND();
 
     std::shared_ptr<Expr> expression();
 
@@ -57,22 +60,21 @@ private:
 
     std::shared_ptr<Expr> assignment();
 
-    bool match(const std::initializer_list<TokenType> &types);
+    bool match(const std::initializer_list<TokenType>& types);
 
-    Token &peek();
+    Token& peek();
 
-    [[nodiscard]] Token &consume() const;
+    [[nodiscard]] Token& consume() const;
 
-    Token &consume(TokenType type, const std::string &message);
+    Token& consume(TokenType type, const std::string& message);
 
-    Token &previous();
+    Token& previous();
 
     bool check(TokenType type);
 
-    Token &advance();
+    Token& advance();
 
     bool isAtEnd();
 
     void synchronize();
 };
-

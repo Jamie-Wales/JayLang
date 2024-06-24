@@ -41,7 +41,7 @@ void runfile(const std::string& path)
     compiler.generateLocalVariables(assem, compiler.environment);
     linker.addCode(assem.code);
 
-    std::string outputDir = "./output/" + baseName;
+    std::string outputDir = baseName;
     std::filesystem::create_directories(outputDir + "/src");
     std::filesystem::create_directories(outputDir + "/bin");
 
