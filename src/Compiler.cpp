@@ -186,8 +186,38 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
                               return info;
                           },
                           [&](const Logical& l) -> AssemblyInfo {
-                              std::cout << "logical parsed" << std::endl;
-                              return {};
+                              AssemblyInfo info;
+                              auto leftInfo = generateAssembly(*l.left);
+                              auto rightInfo = generateAssembly(*l.right);
+
+                              std::string endLabel = "L" + std::to_string(environment->envindex++);
+                              std::string falseLabel = "L" + std::to_string(environment->envindex++);
+
+                              info.code += leftInfo.code;
+
+                              if (l.token.type == TokenType::OR) {
+                                  info.code += "ifne " + endLabel + "\n";
+                                  info.code += rightInfo.code;
+                                  info.code += "ifne " + endLabel + "\n";
+                                  info.code += "iconst_0\n";
+                                  info.code += "goto " + falseLabel + "\n";
+                                  info.code += endLabel + ":\n";
+                                  info.code += "iconst_1\n";
+                                  info.code += falseLabel + ":\n";
+                                  info.type = AssemblyInfo::Type::BOOL;
+                              } else if (l.token.type == TokenType::AND) {
+                                  info.code += "ifeq " + falseLabel + "\n";
+                                  info.code += rightInfo.code;
+                                  info.code += "ifeq " + falseLabel + "\n";
+                                  info.code += "iconst_1\n";
+                                  info.code += "goto " + endLabel + "\n";
+                                  info.code += falseLabel + ":\n";
+                                  info.code += "iconst_0\n";
+                                  info.code += endLabel + ":\n";
+                                  info.type = AssemblyInfo::Type::BOOL;
+                              }
+
+                              return info;
                           },
                           [&](const Unary& u) -> AssemblyInfo {
                               return generateBytecode(u);
