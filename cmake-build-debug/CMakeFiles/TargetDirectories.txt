@@ -1,3 +1,0 @@
-/Users/jamie/Dev/proof/cmake-build-debug/CMakeFiles/jj.dir
-/Users/jamie/Dev/proof/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/jamie/Dev/proof/cmake-build-debug/CMakeFiles/rebuild_cache.dir
