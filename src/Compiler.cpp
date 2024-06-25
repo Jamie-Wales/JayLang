@@ -144,12 +144,10 @@ auto Compiler::generateIfElseStatement(const IfStatement& ifStmt) -> AssemblyInf
 
     emitJump(info.code, "ifeq", elseLabel);
 
-    // If block
     auto ifBlockInfo = generateAssembly(*ifStmt.ifBlock);
     info.code += ifBlockInfo.code;
     emitJump(info.code, "goto", endLabel);
 
-    // Else block
     emitLabel(info.code, elseLabel);
     if (ifStmt.elseBlock != nullptr) {
         auto elseBlockInfo = generateAssembly(*ifStmt.elseBlock);
@@ -277,6 +275,9 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
                               const int index = environment->assign(a.name.getLexeme(), info);
                               emitInstruction(info.code, "astore " + std::to_string(index));
                               return info;
+                          },
+                          [&](const Call& c) -> AssemblyInfo {
+                              c.callee->type = ExprType::VARIABLE;
                           },
                           [&](auto&) -> AssemblyInfo {
                               throw std::runtime_error("Unsupported expression type");

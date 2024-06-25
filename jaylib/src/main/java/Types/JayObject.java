@@ -60,6 +60,17 @@ public class JayObject<T> implements JayType {
         }
     }
 
+    public JayObject<?> negate() {
+        switch (this.type) {
+            case DECIMAL:
+                return new JayObject<>(Type.DECIMAL, ((BigDecimal) this.value).negate());
+            case STRING:
+                return new JayObject<>(Type.STRING, new StringBuilder((String) this.value).reverse().toString());
+            default:
+                throw new RuntimeException("Unsupported type for negation");
+        }
+    }
+
     @Override
     public boolean lessThanEqual(JayObject<?> object) {
         validateType(object);

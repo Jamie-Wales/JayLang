@@ -3,10 +3,11 @@
 #include "Statement.h"
 #include "Token.h"
 #include "statementTypes.h"
+#include <memory>
 
-std::vector<std::shared_ptr<Statement> > Parser::parse()
+std::vector<std::shared_ptr<Statement>> Parser::parse()
 {
-    std::vector<std::shared_ptr<Statement> > statements;
+    std::vector<std::shared_ptr<Statement>> statements;
     while (!isAtEnd()) {
         statements.push_back(declaration());
     }
@@ -15,7 +16,7 @@ std::vector<std::shared_ptr<Statement> > Parser::parse()
 
 std::shared_ptr<Statement> Parser::blockStatement()
 {
-    std::vector<std::shared_ptr<Statement> > statements;
+    std::vector<std::shared_ptr<Statement>> statements;
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         statements.push_back(declaration());
     }
@@ -238,7 +239,39 @@ std::shared_ptr<Expr> Parser::unary()
         return std::make_shared<Expr>(ExprType::UNARY, Unary { oper, right });
     }
 
-    return primary();
+    return call();
+}
+
+std::shared_ptr<Expr> Parser::call()
+{
+    auto expr = primary();
+    while (true) {
+        if (match({ TokenType::LEFT_PAREN })) {
+            expr = finishCall(expr);
+        } else {
+            break;
+        }
+    }
+
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::finishCall(std::shared_ptr<Expr> callee)
+{
+    std::vector<std::shared_ptr<Expr>> arguments = {};
+    if (!check(TokenType::RIGHT_PAREN)) {
+        do {
+            if (arguments.size() >= 255) {
+                error(peek(), "Can't have more than 255 arguments.");
+            }
+            arguments.push_back(expression());
+        } while (match({ TokenType::COMMA }));
+    }
+
+    Token paren = consume(TokenType::RIGHT_PAREN,
+        "Expect ')' after arguments.");
+
+    return std::make_shared<Expr>(ExprType::CALL, Call { callee, arguments });
 }
 
 std::shared_ptr<Expr> Parser::primary()

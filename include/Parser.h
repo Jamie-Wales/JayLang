@@ -39,6 +39,10 @@ private:
 
     std::shared_ptr<Expr> comma();
 
+    std::shared_ptr<Expr> call();
+
+    std::shared_ptr<Expr> finishCall(std::shared_ptr<Expr>);
+
     std::shared_ptr<Expr> ternary();
 
     std::shared_ptr<Expr> variable();

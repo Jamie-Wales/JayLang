@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <variant>
-
+#include <vector>
 enum class ExprType {
     LITERAL,
     UNARY,
@@ -12,7 +12,8 @@ enum class ExprType {
     GROUPING,
     TERNARY,
     VARIABLE,
-    ASSIGNMENT
+    ASSIGNMENT,
+    CALL
 };
 
 class Expr;
@@ -35,6 +36,11 @@ struct Assign {
 struct Unary {
     const Token opr;
     std::shared_ptr<Expr> value;
+};
+
+struct Call {
+    std::shared_ptr<Expr> callee;
+    std::vector<std::shared_ptr<Expr>> args;
 };
 
 struct Ternary {
@@ -62,10 +68,10 @@ class Expr {
 public:
     ExprType type;
     std::variant<Unary,
-        Binary, Assign, Grouping, Literal, Ternary, Variable, Logical>
+        Binary, Assign, Grouping, Literal, Ternary, Variable, Logical, Call>
         content;
 
-    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary, Variable, Logical> content)
+    Expr(ExprType type, std::variant<Unary, Binary, Assign, Grouping, Literal, Ternary, Variable, Logical, Call> content)
         : type(type)
         , content(std::move(content)) {};
 
