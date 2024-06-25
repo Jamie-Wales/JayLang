@@ -2,6 +2,7 @@
 #include "Expression.h"
 #include "Statement.h"
 #include "Token.h"
+#include "statementTypes.h"
 
 std::vector<std::shared_ptr<Statement> > Parser::parse()
 {
@@ -73,14 +74,25 @@ std::shared_ptr<Expr> Parser::assignment()
 
 std::shared_ptr<Statement> Parser::statement()
 {
-    if (match({ TokenType::LOG }))
 
+    if (match({ TokenType::WHILE }))
+        return whileStatement();
+    if (match({ TokenType::LOG }))
         return printStatement();
     if (match({ TokenType::LEFT_BRACE }))
         return blockStatement();
     if (match({ TokenType::IF }))
         return ifStatement();
     return expressionStatement();
+}
+
+std::shared_ptr<Statement> Parser::whileStatement()
+{
+    consume(TokenType::LEFT_PAREN, "Expect '(' after while");
+    auto condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after expression");
+    auto body = statement();
+    return std::make_shared<Statement>(While { condition, body });
 }
 
 /* Returns null for else block if else block does not exist */

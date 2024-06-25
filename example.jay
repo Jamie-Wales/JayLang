@@ -1,1 +1,7 @@
-log 10 > 5 and 1 < 10;
+jj a = 5;
+
+while (a < 10) {
+    a = a + 1;
+    log a;
+}
+

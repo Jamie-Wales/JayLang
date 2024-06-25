@@ -5,7 +5,33 @@
 #include "Statement.h"
 #include "statementTypes.h"
 #include <cstddef>
+#include <stdexcept>
 #include <string>
+
+std::string Compiler::generateLabel()
+{
+    return "L" + std::to_string(labelCounter++);
+}
+
+void Compiler::emitLabel(std::string& code, const std::string& label)
+{
+    code += label + ":\n";
+}
+
+void Compiler::emitJump(std::string& code, const std::string& instruction, const std::string& label)
+{
+    code += instruction + " " + label + "\n";
+}
+
+void Compiler::emitInstruction(std::string& code, const std::string& instruction)
+{
+    code += instruction + "\n";
+}
+
+void Compiler::emitMethodCall(std::string& code, const std::string& className, const std::string& methodName, const std::string& descriptor, const bool& isStatic)
+{
+    code += (isStatic ? "invokestatic " : "invokevirtual ") + className + "/" + methodName + descriptor + "\n";
+}
 
 auto Compiler::generateBytecode(const Binary& b) -> AssemblyInfo
 {
@@ -16,45 +42,44 @@ auto Compiler::generateBytecode(const Binary& b) -> AssemblyInfo
     info.code += rightInfo.code;
     switch (b.opr.type) {
     case TokenType::GREATER:
-        info.code += "invokevirtual Types/JayObject/greaterThan(LTypes/JayObject;)Z\n";
+        emitMethodCall(info.code, "Types/JayObject", "greaterThan", "(LTypes/JayObject;)Z", false);
+        info.type = AssemblyInfo::Type::BOOL;
         break;
     case TokenType::GREATER_EQUAL:
-        info.code += "invokevirtual Types/JayObject/greaterThanEqual(LTypes/JayObject;)Z\n";
+        emitMethodCall(info.code, "Types/JayObject", "greaterThanEqual", "(LTypes/JayObject;)Z", false);
+        info.type = AssemblyInfo::Type::BOOL;
         break;
     case TokenType::LESS:
-        info.code += "invokevirtual Types/JayObject/lessThan(LTypes/JayObject;)Z\n";
+        emitMethodCall(info.code, "Types/JayObject", "lessThan", "(LTypes/JayObject;)Z", false);
+        info.type = AssemblyInfo::Type::BOOL;
         break;
     case TokenType::LESS_EQUAL:
-        info.code += "invokevirtual Types/JayObject/lessThanEqual(LTypes/JayObject;)Z\n";
+        emitMethodCall(info.code, "Types/JayObject", "lessThanEqual", "(LTypes/JayObject;)Z", false);
+        info.type = AssemblyInfo::Type::BOOL;
         break;
     case TokenType::MINUS:
-        info.code += "invokevirtual Types/JayObject/subtract(LTypes/JayObject;)LTypes/JayObject;\n";
+        emitMethodCall(info.code, "Types/JayObject", "subtract", "(LTypes/JayObject;)LTypes/JayObject;", false);
         info.type = AssemblyInfo::Type::DECIMAL;
         break;
     case TokenType::SLASH:
         checkNumberOperands(b.opr, leftInfo.type, rightInfo.type);
-        info.code += "invokevirtual java/math/BigDecimal/divide(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;\n";
+        emitMethodCall(info.code, "Types/JayObject", "divide", "(LTypes/JayObject;)LTypes/JayObject;", false);
         info.type = AssemblyInfo::Type::DECIMAL;
         break;
     case TokenType::STAR:
-        info.code += "invokevirtual Types/JayObject/multiply(LTypes/JayObject;)LTypes/JayObject;\n";
+        emitMethodCall(info.code, "Types/JayObject", "multiply", "(LTypes/JayObject;)LTypes/JayObject;", false);
         info.type = AssemblyInfo::Type::DECIMAL;
         break;
     case TokenType::PLUS:
+        emitMethodCall(info.code, "Types/JayObject", "add", "(LTypes/JayObject;)LTypes/JayObject;", false);
         if (leftInfo.type == AssemblyInfo::Type::DECIMAL && rightInfo.type == AssemblyInfo::Type::DECIMAL) {
-            info.code += "invokevirtual Types/JayObject/add(LTypes/JayObject;)LTypes/JayObject;\n";
             info.type = AssemblyInfo::Type::DECIMAL;
-        } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::STRING) {
-            info.code += "invokevirtual Types/JayObject/add(LTypes/JayObject;)LTypes/JayObject;\n";
-            info.type = AssemblyInfo::Type::STRING;
-        } else if (leftInfo.type == AssemblyInfo::Type::STRING && rightInfo.type == AssemblyInfo::Type::DECIMAL) {
-            info.code += "invokevirtual Types/JayObject/add(LTypes/JayObject;)LTypes/JayObject;\n";
-            info.type = AssemblyInfo::Type::STRING;
-        } else if (leftInfo.type == AssemblyInfo::Type::DECIMAL && rightInfo.type == AssemblyInfo::Type::STRING) {
-            info.code += "invokevirtual Types/JayObject/add(LTypes/JayObject;)LTypes/JayObject;\n";
+        } else {
             info.type = AssemblyInfo::Type::STRING;
         }
         break;
+    default:
+        throw std::runtime_error("Unexpected binary operator");
     }
     return info;
 }
@@ -65,11 +90,14 @@ auto Compiler::generateBytecode(const Unary& u) -> AssemblyInfo
     switch (u.opr.type) {
     case TokenType::MINUS:
         checkNumberOperand(u.opr, info.type);
-        info.code += "invokevirtual java/math/BigDecimal/negate()Ljava/math/BigDecimal;\n";
+        emitMethodCall(info.code, "Types/JayObject", "negate", "()LTypes/JayObject;", false);
         break;
     case TokenType::BANG:
-        isTruthy(*u.value) ? info.code += "iconst_0\n" : info.code += "iconst_1\n";
+        emitMethodCall(info.code, "Types/JayObject", "not", "()Z", false);
+        info.type = AssemblyInfo::Type::BOOL;
         break;
+    default:
+        throw std::runtime_error("Unexpected unary operator");
     }
     return info;
 }
@@ -82,36 +110,91 @@ auto Compiler::generateLocalVariables(AssemblyInfo& info, [[maybe_unused]] Envir
     info.code += ".end localvariabletable\n";
 }
 
+auto Compiler::generateWhileStatement(const While& w) -> AssemblyInfo
+{
+    AssemblyInfo info;
+    std::string conditionLabel = generateLabel();
+    std::string endLabel = generateLabel();
+
+    emitLabel(info.code, conditionLabel);
+
+    auto condInfo = generateAssembly(*w.condition);
+    info.code += condInfo.code;
+
+    // The condition already leaves a boolean on the stack
+    emitJump(info.code, "ifeq", endLabel);
+
+    auto bodyInfo = generateAssembly(*w.body);
+    info.code += bodyInfo.code;
+
+    emitJump(info.code, "goto", conditionLabel);
+    emitLabel(info.code, endLabel);
+
+    return info;
+}
+
+auto Compiler::generateIfElseStatement(const IfStatement& ifStmt) -> AssemblyInfo
+{
+    AssemblyInfo info;
+    auto conditionInfo = generateAssembly(*ifStmt.condition);
+    info.code += conditionInfo.code;
+
+    std::string elseLabel = generateLabel();
+    std::string endLabel = generateLabel();
+
+    emitJump(info.code, "ifeq", elseLabel);
+
+    // If block
+    auto ifBlockInfo = generateAssembly(*ifStmt.ifBlock);
+    info.code += ifBlockInfo.code;
+    emitJump(info.code, "goto", endLabel);
+
+    // Else block
+    emitLabel(info.code, elseLabel);
+    if (ifStmt.elseBlock != nullptr) {
+        auto elseBlockInfo = generateAssembly(*ifStmt.elseBlock);
+        info.code += elseBlockInfo.code;
+    }
+
+    emitLabel(info.code, endLabel);
+
+    return info;
+}
 auto Compiler::generateAssembly(const Statement& stmt) -> AssemblyInfo
 {
     return std::visit(overloaded {
                           [&](const PrintStatement& ps) {
                               AssemblyInfo info = {};
-                              info.code += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
+                              emitInstruction(info.code, "getstatic java/lang/System/out Ljava/io/PrintStream;");
                               auto exprInfo = generateAssembly(*(ps.expression));
                               info.code += exprInfo.code;
-                              info.code += "invokevirtual Types/JayObject/toString()Ljava/lang/String;\n";
-                              info.code += "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\n";
+                              emitMethodCall(info.code, "Types/JayObject", "toString", "()Ljava/lang/String;", false);
+                              emitMethodCall(info.code, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
                               return info;
                           },
                           [&](const ExprStatement& es) {
-                              auto info = generateAssembly(*es.expression);
-                              return info;
+                              return generateAssembly(*es.expression);
                           },
                           [&](const JJStatement& js) {
                               auto info = generateAssembly(*js.value);
                               environment->define(js.name.getLexeme(), info);
                               const auto element = environment->get(js.name.getLexeme());
-                              info.code += "astore " + std::to_string(element->index) + "\n";
+                              emitInstruction(info.code, "astore " + std::to_string(element->index));
                               info.updateDepth(+1);
                               return info;
                           },
+                          [&](const While& w) {
+                              return generateWhileStatement(w);
+                          },
                           [&](const Block& b) {
                               AssemblyInfo info = {};
-
                               Environment* env = environment->createChild();
                               environment = env;
-                              info.code += "L" + std::to_string(env->envindex) + ":\n";
+
+                              std::string startLabel = generateLabel();
+                              std::string endLabel = generateLabel();
+
+                              emitLabel(info.code, startLabel);
 
                               for (const std::shared_ptr<Statement>& ptr : b.statements) {
                                   auto [code, maxStackDepth, currentDepth, type] = generateAssembly(*ptr);
@@ -119,35 +202,23 @@ auto Compiler::generateAssembly(const Statement& stmt) -> AssemblyInfo
                               }
 
                               for (auto& [name, variable] : env->variables) {
-                                  localVariableTable += std::to_string(variable.index) + " is " + variable.name + "  Ljava/lang/String;" + " from L" + std::to_string(env->envindex) + " to L" + std::to_string(env->envindex + 1) + "\n";
+                                  localVariableTable += std::to_string(variable.index) + " is " + variable.name + "  Ljava/lang/String;" + " from " + startLabel + " to " + endLabel + "\n";
                               }
-                              info.code += "L" + std::to_string(++env->envindex) + ":\n";
+
+                              emitLabel(info.code, endLabel);
+
                               this->environment = this->environment->parent;
                               delete this->environment->child;
                               return info;
                           },
-                          [&](const IfStatement& i) -> AssemblyInfo {
-                              auto info = generateAssembly(*i.condition);
-                              if (i.elseBlock == nullptr) {
-                                  info.code += "ifne L" + std::to_string(environment->envindex + 1) + "\n";
-                                  info.code += "goto L" + std::to_string(environment->envindex + 2) + "\n";
-                                  auto ifBlock = generateAssembly(*i.ifBlock);
-                                  info.code += ifBlock.code;
-                              } else {
-                                  info.code += "ifne L" + std::to_string(environment->envindex + 3) + "\n";
-                                  auto elseBlock = generateAssembly(*i.elseBlock);
-                                  info.code += elseBlock.code;
-                                  info.code += "goto L" + std::to_string(environment->envindex + 2) + "\n";
-                                  auto ifBlock = generateAssembly(*i.ifBlock);
-                                  info.code += ifBlock.code;
-                              }
-                              return info;
+                          [&](const IfStatement& i) {
+                              return generateIfElseStatement(i);
                           },
                           [&](auto&) {
                               throw std::runtime_error("Unsupported statement type");
                           } },
         stmt.content);
-};
+}
 
 auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
 {
@@ -156,86 +227,55 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
                               AssemblyInfo info;
                               std::visit(overloaded {
                                              [&](const double& d) {
-                                                 info.code += "ldc2_w " + std::to_string(d) + "\n";
-                                                 info.code += "invokestatic Types/JayObject/generateObject(D)LTypes/JayObject;\n";
+                                                 emitInstruction(info.code, "ldc2_w " + std::to_string(d));
+                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(D)LTypes/JayObject;", true);
                                                  info.updateDepth(1);
                                                  info.type = AssemblyInfo::Type::DECIMAL;
                                              },
                                              [&](const std::string& s) {
-                                                 info.code += "ldc " + s + "\n";
-                                                 info.code += "invokestatic Types/JayObject/generateObject(Ljava/lang/String;)LTypes/JayObject;\n";
+                                                 emitInstruction(info.code, "ldc " + s);
+                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(Ljava/lang/String;)LTypes/JayObject;", true);
                                                  info.updateDepth(1);
                                                  info.type = AssemblyInfo::Type::STRING;
                                              },
                                              [&](const bool& b) {
-                                                 info.code = b ? "iconst_1\n" : "iconst_0\n";
+                                                 emitInstruction(info.code, b ? "iconst_1" : "iconst_0");
+                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(Z)LTypes/JayObject;", true);
                                                  info.updateDepth(2);
                                                  info.type = AssemblyInfo::Type::BOOL;
                                              },
-                                             [&](const nullptr_t null) {
-                                                 info.code = "aconst_null\n";
+                                             [&](const nullptr_t) {
+                                                 emitInstruction(info.code, "aconst_null");
                                                  info.updateDepth(1);
                                                  info.type = AssemblyInfo::Type::NULL_T;
                                              },
-                                             [&](auto&) { std::cerr << "Undefined expression" << std::endl; } },
+                                             [&](auto&) { throw std::runtime_error("Undefined literal type"); } },
                                   l.literal);
                               return info;
                           },
-                          [&](const Grouping& g) -> AssemblyInfo {
-                              auto info = generateAssembly(*g.expression);
-                              return info;
+                          [&](const Grouping& g) {
+                              return generateAssembly(*g.expression);
                           },
                           [&](const Logical& l) -> AssemblyInfo {
-                              AssemblyInfo info;
-                              auto leftInfo = generateAssembly(*l.left);
-                              auto rightInfo = generateAssembly(*l.right);
-
-                              std::string endLabel = "L" + std::to_string(environment->envindex++);
-                              std::string falseLabel = "L" + std::to_string(environment->envindex++);
-
-                              info.code += leftInfo.code;
-
-                              if (l.token.type == TokenType::OR) {
-                                  info.code += "ifne " + endLabel + "\n";
-                                  info.code += rightInfo.code;
-                                  info.code += "ifne " + endLabel + "\n";
-                                  info.code += "iconst_0\n";
-                                  info.code += "goto " + falseLabel + "\n";
-                                  info.code += endLabel + ":\n";
-                                  info.code += "iconst_1\n";
-                                  info.code += falseLabel + ":\n";
-                                  info.type = AssemblyInfo::Type::BOOL;
-                              } else if (l.token.type == TokenType::AND) {
-                                  info.code += "ifeq " + falseLabel + "\n";
-                                  info.code += rightInfo.code;
-                                  info.code += "ifeq " + falseLabel + "\n";
-                                  info.code += "iconst_1\n";
-                                  info.code += "goto " + endLabel + "\n";
-                                  info.code += falseLabel + ":\n";
-                                  info.code += "iconst_0\n";
-                                  info.code += endLabel + ":\n";
-                                  info.type = AssemblyInfo::Type::BOOL;
-                              }
-
-                              return info;
+                              return generateBytecode(Binary { l.left, l.token, l.right });
                           },
-                          [&](const Unary& u) -> AssemblyInfo {
+                          [&](const Unary& u) {
                               return generateBytecode(u);
                           },
-                          [&](const Binary& b) -> AssemblyInfo {
+                          [&](const Binary& b) {
                               return generateBytecode(b);
                           },
                           [&](const Variable& v) -> AssemblyInfo {
                               AssemblyInfo info;
                               const auto element = environment->get(v.name.getLexeme());
-                              info.code += "aload " + std::to_string(element->index) + "\n";
+                              emitInstruction(info.code, "aload " + std::to_string(element->index));
                               info.type = element->info.type;
                               return info;
                           },
                           [&](const Assign& a) -> AssemblyInfo {
                               AssemblyInfo info = generateAssembly(*a.value);
                               const int index = environment->assign(a.name.getLexeme(), info);
-                              info.code += "astore " + std::to_string(index) + "\n";
+                              emitInstruction(info.code, "astore " + std::to_string(index));
                               return info;
                           },
                           [&](auto&) -> AssemblyInfo {
@@ -247,12 +287,11 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
 auto Compiler::isTruthy(const Expr& object) -> bool
 {
     if (std::holds_alternative<Literal>(object.content)) {
-        const auto l = std::get<Literal>(object.content);
+        const auto& l = std::get<Literal>(object.content);
         if (std::holds_alternative<nullptr_t>(l.literal))
             return false;
         if (std::holds_alternative<bool>(l.literal))
             return std::get<bool>(l.literal);
     }
-
     return true;
 }

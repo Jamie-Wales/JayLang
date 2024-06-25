@@ -18,9 +18,13 @@ struct JJStatement {
 };
 
 struct Block {
-    std::vector<std::shared_ptr<Statement> > statements;
+    std::vector<std::shared_ptr<Statement>> statements;
 };
 
+struct While {
+    std::shared_ptr<Expr> condition;
+    std::shared_ptr<Statement> body;
+};
 struct IfStatement {
     std::shared_ptr<Expr> condition;
     std::shared_ptr<Statement> ifBlock;

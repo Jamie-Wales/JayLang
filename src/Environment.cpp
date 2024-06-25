@@ -1,4 +1,5 @@
 #include "Environment.h"
+#include <stdexcept>
 
 size_t Environment::varibleCount = 0;
 size_t Environment::envindex = 0;
@@ -7,8 +8,7 @@ void Environment::define(const std::string& name, const AssemblyInfo& info)
 {
     const EnvVariable var = { name, info, varibleCount };
     if (variables.find(name) != variables.end()) {
-        std::runtime_error error("Cannot redefine " + name);
-        throw error;
+        throw std::runtime_error("Cannot redefine " + name);
     }
     variables[name] = var;
     varibleCount++;
@@ -16,7 +16,7 @@ void Environment::define(const std::string& name, const AssemblyInfo& info)
 
 Environment* Environment::createChild()
 {
-    const auto newEnv = new Environment();
+    auto newEnv = new Environment();
     newEnv->parent = this;
     child = newEnv;
     child->envindex = this->envindex + 1;
@@ -25,33 +25,27 @@ Environment* Environment::createChild()
 
 int Environment::assign(const std::string& name, const AssemblyInfo& info)
 {
-    auto child = this;
-    while (child != nullptr) {
-        for (auto& [index, value] : variables) {
-            if (index == name) {
-                auto curr = variables.at(name);
-                EnvVariable next { name, info, curr.index };
-                variables[name] = next;
-                return static_cast<int>(curr.index);
-            }
+    auto current = this;
+    while (current != nullptr) {
+        auto it = current->variables.find(name);
+        if (it != current->variables.end()) {
+            it->second.info = info;
+            return static_cast<int>(it->second.index);
         }
-        child = child->parent;
+        current = current->parent;
     }
-
-    std::runtime_error error("Cannot assign " + name + " does not exist");
-    return -1;
+    throw std::runtime_error("Cannot assign " + name + ": variable does not exist");
 }
 
 std::shared_ptr<EnvVariable> Environment::get(const std::string& name)
 {
-    auto parent = this;
-    while (parent != nullptr) {
-        for (auto& [index, value] : variables) {
-            if (index == name) {
-                return std::make_shared<EnvVariable>(value);
-            }
+    auto current = this;
+    while (current != nullptr) {
+        auto it = current->variables.find(name);
+        if (it != current->variables.end()) {
+            return std::make_shared<EnvVariable>(it->second);
         }
-        parent = parent->parent;
+        current = current->parent;
     }
     return nullptr;
 }
@@ -62,17 +56,15 @@ void Environment::clear()
         Environment* env;
         std::string name;
     };
-
     std::vector<pair> toRemove;
-    Environment* parent = this;
-    while (parent != nullptr) {
-        for (auto& [index, value] : variables) {
-            toRemove.push_back({ parent, index });
+    Environment* current = this;
+    while (current != nullptr) {
+        for (const auto& [name, _] : current->variables) {
+            toRemove.push_back({ current, name });
         }
-        parent = parent->parent;
+        current = current->parent;
     }
-
-    for (auto& [env, name] : toRemove) {
+    for (const auto& [env, name] : toRemove) {
         env->variables.erase(name);
     }
 }

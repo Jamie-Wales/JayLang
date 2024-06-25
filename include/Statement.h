@@ -4,9 +4,10 @@
 
 class Statement {
 public:
-    std::variant<ExprStatement, PrintStatement, JJStatement, Block, IfStatement> content;
+    std::variant<ExprStatement, PrintStatement, JJStatement, Block, IfStatement, While> content;
 
-    explicit Statement(std::variant<ExprStatement, PrintStatement, JJStatement, Block, IfStatement> content)
-        : content(std::move(content)) {
+    explicit Statement(std::variant<ExprStatement, PrintStatement, JJStatement, Block, IfStatement, While> content)
+        : content(std::move(content))
+    {
     }
 };

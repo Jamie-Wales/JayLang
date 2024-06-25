@@ -47,6 +47,7 @@ private:
 
     std::shared_ptr<Statement> declaration();
 
+    std::shared_ptr<Statement> whileStatement();
     /* Returns null for else block if else block does not exist */
     std::shared_ptr<Statement> ifStatement();
 
