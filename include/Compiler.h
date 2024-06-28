@@ -23,7 +23,7 @@ private:
         using Ts::operator()...;
     };
 
-    AssemblyInfo JavaStaticCall(const std::vector<std::shared_ptr<Expr>> arguments);
+    AssemblyInfo JavaStaticCall(const std::vector<std::shared_ptr<Expr>>& arguments);
     template <class... Ts>
     overloaded(Ts...) -> overloaded<Ts...>;
 

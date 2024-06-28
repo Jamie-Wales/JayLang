@@ -1,3 +1,4 @@
 jj a = JavaStaticCall("java.lang.Math", "max", 10, 20);
-log a;
-
+jj b = JavaStaticCall("java.lang.String", "concat", "Hello", " World!");
+jj c = JavaStaticCall("java.lang.String", "contains", "asdjiasd", "j");
+log a + b + c;

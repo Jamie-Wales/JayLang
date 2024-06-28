@@ -35,6 +35,10 @@ public class JayObject<T> implements JayType {
     public static JayObject<String> generateObject(String str) {
         return new JayObject<>(Type.STRING, str);
     }
+   public static JayObject<Boolean> generateObject(boolean b) {
+       return new JayObject<>(Type.BOOLEAN, b);
+   }
+
 
     public Type getType() {
         return type;
@@ -51,6 +55,8 @@ public class JayObject<T> implements JayType {
             } else {
                 return new BigDecimal(value.toString()).doubleValue();
             }
+        } else if (type == Type.BOOLEAN) {
+            return ((Boolean) value).booleanValue();
         } else {
             return value;
         }
@@ -202,6 +208,6 @@ public class JayObject<T> implements JayType {
     }
 
     public enum Type {
-        DECIMAL, STRING, OBJECT
+        DECIMAL, STRING, OBJECT, BOOLEAN
     }
 }

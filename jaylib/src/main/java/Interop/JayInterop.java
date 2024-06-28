@@ -9,7 +9,7 @@ public class JayInterop {
     private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
     public static CallSite bootstrap(MethodHandles.Lookup caller, String name, MethodType type, String className,
-            String methodName) throws Throwable {
+                                     String methodName) throws Throwable {
         MethodHandle target = lookup.findStatic(JayInterop.class, "callMethod",
                 MethodType.methodType(Object.class, String.class, String.class, Object[].class));
         target = target.bindTo(className).bindTo(methodName);
@@ -82,7 +82,6 @@ public class JayInterop {
         }
         for (int i = 0; i < methodParams.length; i++) {
             if (!methodParams[i].isAssignableFrom(actualParams[i])) {
-                // Handle primitive type boxing
                 if (methodParams[i].isPrimitive() && actualParams[i] == getWrapperClass(methodParams[i])) {
                     continue;
                 }
@@ -99,7 +98,6 @@ public class JayInterop {
             return Double.class;
         if (primitiveType == boolean.class)
             return Boolean.class;
-        // Add other primitive types as needed
         return primitiveType;
     }
 }
