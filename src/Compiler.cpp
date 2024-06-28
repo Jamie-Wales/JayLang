@@ -8,14 +8,12 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-
 AssemblyInfo Compiler::JavaStaticCall(const std::vector<std::shared_ptr<Expr>>& args)
 {
     AssemblyInfo info;
     if (args.size() < 2) {
         throw std::runtime_error("JavaStaticCall requires at least class name and method name");
     }
-
     auto classNameExpr = std::get<std::string>(std::get<Literal>(args[0]->content).literal);
     auto methodNameExpr = std::get<std::string>(std::get<Literal>(args[1]->content).literal);
 
@@ -23,14 +21,30 @@ AssemblyInfo Compiler::JavaStaticCall(const std::vector<std::shared_ptr<Expr>>& 
     emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodHandles lookup ()Ljava/lang/invoke/MethodHandles$Lookup;");
     emitInstruction(info.code, "ldc " + methodNameExpr);
     emitInstruction(info.code, "ldc Class java/lang/Object");
-    emitInstruction(info.code, "ldc Class java/lang/Object");
-    emitInstruction(info.code, "iconst_1");
-    emitInstruction(info.code, "anewarray java/lang/Class");
-    emitInstruction(info.code, "dup");
-    emitInstruction(info.code, "iconst_0");
-    emitInstruction(info.code, "ldc Class java/lang/Object");
-    emitInstruction(info.code, "aastore");
-    emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodType methodType (Ljava/lang/Class;Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/invoke/MethodType;");
+
+    // Create array of parameter types
+    int numParams = args.size() - 2;
+    if (numParams == 0) {
+        // No parameters
+        emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodType methodType (Ljava/lang/Class;)Ljava/lang/invoke/MethodType;");
+    } else if (numParams == 1) {
+        // One parameter
+        emitInstruction(info.code, "ldc Class java/lang/Object");
+        emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodType methodType (Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/invoke/MethodType;");
+    } else {
+        // Multiple parameters
+        emitInstruction(info.code, "ldc Class java/lang/Object");
+        emitInstruction(info.code, "iconst_" + std::to_string(numParams - 1));
+        emitInstruction(info.code, "anewarray java/lang/Class");
+        for (int i = 0; i < numParams - 1; i++) {
+            emitInstruction(info.code, "dup");
+            emitInstruction(info.code, "iconst_" + std::to_string(i));
+            emitInstruction(info.code, "ldc Class java/lang/Object");
+            emitInstruction(info.code, "aastore");
+        }
+        emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodType methodType (Ljava/lang/Class;Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/invoke/MethodType;");
+    }
+
     emitInstruction(info.code, "ldc " + classNameExpr);
     emitInstruction(info.code, "ldc " + methodNameExpr);
     emitInstruction(info.code, "invokestatic Method Interop/JayInterop bootstrap (Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/invoke/CallSite;");
