@@ -26,7 +26,6 @@ AssemblyInfo Compiler::JavaStaticCall(const std::vector<std::shared_ptr<Expr>> a
     auto classNameExpr = std::get<std::string>(std::get<Literal>(args[0]->content).literal);
     auto methodNameExpr = std::get<std::string>(std::get<Literal>(args[1]->content).literal);
 
-    // Generate the invokedynamic setup
     emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodHandles lookup ()Ljava/lang/invoke/MethodHandles$Lookup;");
     emitInstruction(info.code, "ldc " + methodNameExpr);
     emitInstruction(info.code, "ldc Class java/lang/Object");
@@ -44,20 +43,16 @@ AssemblyInfo Compiler::JavaStaticCall(const std::vector<std::shared_ptr<Expr>> a
     emitInstruction(info.code, "ldc " + methodNameExpr);
     emitInstruction(info.code, "invokestatic Method Interop/JayInterop bootstrap (Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/invoke/CallSite;");
 
-    // Store the CallSite
     emitInstruction(info.code, "astore_3");
 
-    // Load the CallSite and get its dynamicInvoker
     emitInstruction(info.code, "aload_3");
     emitInstruction(info.code, "invokevirtual Method java/lang/invoke/CallSite dynamicInvoker ()Ljava/lang/invoke/MethodHandle;");
 
-    // Load the arguments
     for (size_t i = 2; i < args.size(); ++i) {
         auto argInfo = generateAssembly(*args[i]);
         info.code += argInfo.code;
     }
 
-    // Invoke the method handle
     std::string invokeInstruction = "invokevirtual Method java/lang/invoke/MethodHandle invoke (";
     for (size_t i = 2; i < args.size(); ++i) {
         invokeInstruction += "LTypes/JayObject;";
