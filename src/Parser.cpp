@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "Expression.h"
+#include "ParseError.h"
 #include "Statement.h"
 #include "Token.h"
 #include "statementTypes.h"
@@ -29,11 +30,33 @@ std::shared_ptr<Statement> Parser::declaration()
     try {
         if (match({ TokenType::JJ }))
             return jjdeclaration();
+        if (match({ TokenType::FUNC }))
+            return function("Function");
         return statement();
     } catch (ParseError& error) {
         synchronize();
         return nullptr;
     }
+}
+
+std::shared_ptr<Statement> Parser::function(std::string kind)
+{
+
+    Token name = consume(TokenType::IDENTIFIER, "Expect " + kind + " name.");
+    consume(TokenType::LEFT_PAREN, "Expect '(' after " + kind + " name.");
+    std::vector<Token> parameters = {};
+    if (!check(TokenType::RIGHT_PAREN)) {
+        do {
+            if (parameters.size() >= 255) {
+                error(peek(), "Can't have more than 255 parameters.");
+            }
+            parameters.push_back(consume(TokenType::IDENTIFIER, "Expect parameter name."));
+        } while (match({ TokenType::COMMA }));
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' before " + kind + " body.");
+    auto body = blockStatement();
+    return std::make_shared<Statement>(Function { name, parameters, body });
 }
 
 std::shared_ptr<Statement> Parser::jjdeclaration()
@@ -75,7 +98,6 @@ std::shared_ptr<Expr> Parser::assignment()
 
 std::shared_ptr<Statement> Parser::statement()
 {
-
     if (match({ TokenType::WHILE }))
         return whileStatement();
     if (match({ TokenType::LOG }))
@@ -247,6 +269,9 @@ std::shared_ptr<Expr> Parser::call()
     auto expr = primary();
     while (true) {
         if (match({ TokenType::LEFT_PAREN })) {
+            if (expr->type != ExprType::VARIABLE) {
+                throw new ParseError(peek(), "Can only call variable types");
+            }
             expr = finishCall(expr);
         } else {
             break;

@@ -9,16 +9,13 @@ public:
     explicit Parser(std::vector<Token> tokens)
         : tokens { std::move(tokens) } {};
 
-    std::vector<std::shared_ptr<Statement> > parse();
+    std::vector<std::shared_ptr<Statement>> parse();
 
     ErrorHandler err = {};
     size_t current = 0;
 
 private:
-    ParseError error(Token& token, const std::string& message);
-
-    std::vector<Token> tokens;
-
+    /* ----- Expressions ----- */
     std::shared_ptr<Expr> logicalOR();
 
     std::shared_ptr<Expr> logicalAND();
@@ -47,6 +44,9 @@ private:
 
     std::shared_ptr<Expr> variable();
 
+    std::shared_ptr<Expr> assignment();
+
+    /* ----- Statements ----- */
     std::shared_ptr<Statement> statement();
 
     std::shared_ptr<Statement> declaration();
@@ -63,7 +63,12 @@ private:
 
     std::shared_ptr<Statement> blockStatement();
 
-    std::shared_ptr<Expr> assignment();
+    std::shared_ptr<Statement> function(std::string kind);
+
+    /* ----- Helper parsing functions ---- */
+    ParseError error(Token& token, const std::string& message);
+
+    std::vector<Token> tokens;
 
     bool match(const std::initializer_list<TokenType>& types);
 

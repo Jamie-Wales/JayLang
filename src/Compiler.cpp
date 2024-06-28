@@ -5,9 +5,70 @@
 #include "Statement.h"
 #include "statementTypes.h"
 #include <cstddef>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
+std::string stripQuotes(const std::string& str)
+{
+    if (str.size() >= 2 && str.front() == '"' && str.back() == '"') {
+        return str.substr(1, str.size() - 2);
+    }
+    return str;
+}
+AssemblyInfo Compiler::JavaStaticCall(const std::vector<std::shared_ptr<Expr>> args)
+{
+    AssemblyInfo info;
+    if (args.size() < 2) {
+        throw std::runtime_error("JavaStaticCall requires at least class name and method name");
+    }
+
+    auto classNameExpr = std::get<std::string>(std::get<Literal>(args[0]->content).literal);
+    auto methodNameExpr = std::get<std::string>(std::get<Literal>(args[1]->content).literal);
+
+    // Generate the invokedynamic setup
+    emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodHandles lookup ()Ljava/lang/invoke/MethodHandles$Lookup;");
+    emitInstruction(info.code, "ldc " + methodNameExpr);
+    emitInstruction(info.code, "ldc Class java/lang/Object");
+    emitInstruction(info.code, "ldc Class java/lang/Object");
+    emitInstruction(info.code, "iconst_" + std::to_string(args.size() - 2));
+    emitInstruction(info.code, "anewarray java/lang/Class");
+    for (size_t i = 0; i < args.size() - 2; ++i) {
+        emitInstruction(info.code, "dup");
+        emitInstruction(info.code, "iconst_" + std::to_string(i));
+        emitInstruction(info.code, "ldc Class java/lang/Object");
+        emitInstruction(info.code, "aastore");
+    }
+    emitInstruction(info.code, "invokestatic Method java/lang/invoke/MethodType methodType (Ljava/lang/Class;Ljava/lang/Class;[Ljava/lang/Class;)Ljava/lang/invoke/MethodType;");
+    emitInstruction(info.code, "ldc " + classNameExpr);
+    emitInstruction(info.code, "ldc " + methodNameExpr);
+    emitInstruction(info.code, "invokestatic Method Interop/JayInterop bootstrap (Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/invoke/CallSite;");
+
+    // Store the CallSite
+    emitInstruction(info.code, "astore_3");
+
+    // Load the CallSite and get its dynamicInvoker
+    emitInstruction(info.code, "aload_3");
+    emitInstruction(info.code, "invokevirtual Method java/lang/invoke/CallSite dynamicInvoker ()Ljava/lang/invoke/MethodHandle;");
+
+    // Load the arguments
+    for (size_t i = 2; i < args.size(); ++i) {
+        auto argInfo = generateAssembly(*args[i]);
+        info.code += argInfo.code;
+    }
+
+    // Invoke the method handle
+    std::string invokeInstruction = "invokevirtual Method java/lang/invoke/MethodHandle invoke (";
+    for (size_t i = 2; i < args.size(); ++i) {
+        invokeInstruction += "LTypes/JayObject;";
+    }
+    invokeInstruction += ")Ljava/lang/Object;";
+    emitInstruction(info.code, invokeInstruction);
+
+    emitInstruction(info.code, "invokestatic Method Types/JayObject generateObject (Ljava/lang/Object;)LTypes/JayObject;");
+
+    return info;
+}
 std::string Compiler::generateLabel()
 {
     return "L" + std::to_string(labelCounter++);
@@ -28,7 +89,8 @@ void Compiler::emitInstruction(std::string& code, const std::string& instruction
     code += instruction + "\n";
 }
 
-void Compiler::emitMethodCall(std::string& code, const std::string& className, const std::string& methodName, const std::string& descriptor, const bool& isStatic)
+void Compiler::emitMethodCall(std::string& code, const std::string& className, const std::string& methodName,
+    const std::string& descriptor, const bool& isStatic)
 {
     code += (isStatic ? "invokestatic " : "invokevirtual ") + className + "/" + methodName + descriptor + "\n";
 }
@@ -106,7 +168,7 @@ auto Compiler::generateLocalVariables(AssemblyInfo& info, [[maybe_unused]] Envir
 {
     info.code += "return\n";
     info.code += ".localvariabletable\n";
-    info.code += this->localVariableTable;
+    // info.code += this->localVariableTable;
     info.code += ".end localvariabletable\n";
 }
 
@@ -158,6 +220,7 @@ auto Compiler::generateIfElseStatement(const IfStatement& ifStmt) -> AssemblyInf
 
     return info;
 }
+
 auto Compiler::generateAssembly(const Statement& stmt) -> AssemblyInfo
 {
     return std::visit(overloaded {
@@ -175,10 +238,16 @@ auto Compiler::generateAssembly(const Statement& stmt) -> AssemblyInfo
                           },
                           [&](const JJStatement& js) {
                               auto info = generateAssembly(*js.value);
+
                               environment->define(js.name.getLexeme(), info);
-                              const auto element = environment->get(js.name.getLexeme());
-                              emitInstruction(info.code, "astore " + std::to_string(element->index));
-                              info.updateDepth(+1);
+                              int index = environment->get(js.name.getLexeme())->index;
+                              emitInstruction(info.code, "astore " + std::to_string(index));
+
+                              // Update the local variable table
+                              std::string startLabel = generateLabel();
+                              std::string endLabel = generateLabel();
+                              localVariableTable += std::to_string(index) + " is " + js.name.getLexeme() + " LTypes/JayObject; from " + startLabel + " to " + endLabel + "\n";
+
                               return info;
                           },
                           [&](const While& w) {
@@ -212,6 +281,9 @@ auto Compiler::generateAssembly(const Statement& stmt) -> AssemblyInfo
                           [&](const IfStatement& i) {
                               return generateIfElseStatement(i);
                           },
+                          [&](const Function) -> AssemblyInfo {
+                              return {};
+                          },
                           [&](auto&) {
                               throw std::runtime_error("Unsupported statement type");
                           } },
@@ -226,19 +298,22 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
                               std::visit(overloaded {
                                              [&](const double& d) {
                                                  emitInstruction(info.code, "ldc2_w " + std::to_string(d));
-                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(D)LTypes/JayObject;", true);
+                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(D)LTypes/JayObject;",
+                                                     true);
                                                  info.updateDepth(1);
                                                  info.type = AssemblyInfo::Type::DECIMAL;
                                              },
                                              [&](const std::string& s) {
                                                  emitInstruction(info.code, "ldc " + s);
-                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(Ljava/lang/String;)LTypes/JayObject;", true);
+                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject",
+                                                     "(Ljava/lang/String;)LTypes/JayObject;", true);
                                                  info.updateDepth(1);
                                                  info.type = AssemblyInfo::Type::STRING;
                                              },
                                              [&](const bool& b) {
                                                  emitInstruction(info.code, b ? "iconst_1" : "iconst_0");
-                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(Z)LTypes/JayObject;", true);
+                                                 emitMethodCall(info.code, "Types/JayObject", "generateObject", "(Z)LTypes/JayObject;",
+                                                     true);
                                                  info.updateDepth(2);
                                                  info.type = AssemblyInfo::Type::BOOL;
                                              },
@@ -263,6 +338,13 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
                           [&](const Binary& b) {
                               return generateBytecode(b);
                           },
+                          [&](const Call& c) -> AssemblyInfo {
+                              auto variable = std::get<Variable>(c.callee->content);
+                              if (variable.name.getLexeme() == "JavaStaticCall") {
+                                  return JavaStaticCall(c.args);
+                              }
+                              return {};
+                          },
                           [&](const Variable& v) -> AssemblyInfo {
                               AssemblyInfo info;
                               const auto element = environment->get(v.name.getLexeme());
@@ -276,9 +358,7 @@ auto Compiler::generateAssembly(const Expr& expr) -> AssemblyInfo
                               emitInstruction(info.code, "astore " + std::to_string(index));
                               return info;
                           },
-                          [&](const Call& c) -> AssemblyInfo {
-                              c.callee->type = ExprType::VARIABLE;
-                          },
+
                           [&](auto&) -> AssemblyInfo {
                               throw std::runtime_error("Unsupported expression type");
                           } },

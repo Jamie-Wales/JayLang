@@ -30,3 +30,9 @@ struct IfStatement {
     std::shared_ptr<Statement> ifBlock;
     std::shared_ptr<Statement> elseBlock;
 };
+
+struct Function {
+    const Token& name;
+    std::vector<Token> params;
+    std::shared_ptr<Statement> body;
+};

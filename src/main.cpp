@@ -56,7 +56,7 @@ void runfile(const std::string& path)
         return;
     }
 
-    std::string nativeImageCommand = NATIVEIMAGEPATH + " -H:+UnlockExperimentalVMOptions -cp ../jaylib/target/JayLib-0.1.jar:" + outputDir + "/src " + baseName + " -H:Name=" + executableName;
+    std::string nativeImageCommand = NATIVEIMAGEPATH + " -H:+UnlockExperimentalVMOptions" + " -H:ReflectionConfigurationFiles=reflection-config.json" + " -cp ../jaylib/target/JayLib-0.1.jar:" + outputDir + "/src" + " " + baseName + " -H:Name=" + executableName + " --no-fallback";
     if (system(nativeImageCommand.c_str()) != 0) {
         std::cerr << "Native image generation failed.\n";
         return;

@@ -12,8 +12,24 @@ public class JayObject<T> implements JayType {
         this.value = value;
     }
 
+    public static JayObject<?> generateObject(Object obj) {
+        if (obj instanceof Double || obj instanceof Integer || obj instanceof BigDecimal) {
+            return new JayObject<>(Type.DECIMAL, new BigDecimal(obj.toString()));
+        } else if (obj instanceof String) {
+            return new JayObject<>(Type.STRING, (String) obj);
+        } else if (obj instanceof JayObject) {
+            return (JayObject<?>) obj;
+        } else {
+            return new JayObject<>(Type.OBJECT, obj);
+        }
+    }
+
     public static JayObject<BigDecimal> generateObject(double d) {
         return new JayObject<>(Type.DECIMAL, new BigDecimal(d));
+    }
+
+    public static JayObject<BigDecimal> generateObject(int i) {
+        return new JayObject<>(Type.DECIMAL, new BigDecimal(i));
     }
 
     public static JayObject<String> generateObject(String str) {
@@ -28,6 +44,26 @@ public class JayObject<T> implements JayType {
         return value;
     }
 
+    public Object getJavaObject() {
+        if (type == Type.DECIMAL) {
+            if (value instanceof BigDecimal) {
+                return ((BigDecimal) value).doubleValue();
+            } else {
+                return new BigDecimal(value.toString()).doubleValue();
+            }
+        } else {
+            return value;
+        }
+    }
+
+    public Number getNumber() {
+        if (value instanceof Number) {
+            return (Number) value;
+        } else {
+            throw new IllegalArgumentException("The contained value is not a number");
+        }
+    }
+
     @Override
     public boolean greaterThan(JayObject<?> object) {
         validateType(object);
@@ -35,15 +71,14 @@ public class JayObject<T> implements JayType {
             case DECIMAL:
                 return ((BigDecimal) this.value).compareTo((BigDecimal) object.value) > 0;
             case STRING:
-                return ((String) this.value).length() > ((String) object.value).length();
+                return ((String) this.value).compareTo((String) object.value) > 0;
             default:
-                throw new RuntimeException("Invalid type");
+                throw new RuntimeException("Comparison not supported for this type");
         }
     }
 
     @Override
     public boolean greaterThanEqual(JayObject<?> object) {
-        validateType(object);
         return this.greaterThan(object) || this.equal(object);
     }
 
@@ -54,10 +89,27 @@ public class JayObject<T> implements JayType {
             case DECIMAL:
                 return ((BigDecimal) this.value).compareTo((BigDecimal) object.value) < 0;
             case STRING:
-                return ((String) this.value).length() < ((String) object.value).length();
+                return ((String) this.value).compareTo((String) object.value) < 0;
             default:
-                throw new RuntimeException("Invalid type");
+                throw new RuntimeException("Comparison not supported for this type");
         }
+    }
+
+    @Override
+    public boolean lessThanEqual(JayObject<?> object) {
+        return this.lessThan(object) || this.equal(object);
+    }
+
+    @Override
+    public boolean equal(JayObject<?> object) {
+        if (this.type != object.type)
+            return false;
+        return Objects.equals(this.value, object.value);
+    }
+
+    @Override
+    public boolean notEqual(JayObject<?> object) {
+        return !this.equal(object);
     }
 
     public JayObject<?> negate() {
@@ -67,20 +119,8 @@ public class JayObject<T> implements JayType {
             case STRING:
                 return new JayObject<>(Type.STRING, new StringBuilder((String) this.value).reverse().toString());
             default:
-                throw new RuntimeException("Unsupported type for negation");
+                throw new RuntimeException("Negation not supported for this type");
         }
-    }
-
-    @Override
-    public boolean lessThanEqual(JayObject<?> object) {
-        validateType(object);
-        return this.lessThan(object) || this.equal(object);
-    }
-
-    @Override
-    public boolean equal(JayObject<?> object) {
-        validateType(object);
-        return this.value.equals(object.value);
     }
 
     public JayObject<?> add(JayObject<?> add) {
@@ -88,47 +128,14 @@ public class JayObject<T> implements JayType {
             case DECIMAL:
                 if (add.type == Type.DECIMAL) {
                     return new JayObject<>(Type.DECIMAL, ((BigDecimal) this.value).add((BigDecimal) add.value));
-                } else {
-                    return new JayObject<>(Type.STRING, this.value.toString() + add.value.toString());
+                } else if (add.type == Type.STRING) {
+                    return new JayObject<>(Type.STRING, this.value.toString() + add.value);
                 }
+                break;
             case STRING:
                 return new JayObject<>(Type.STRING, this.value.toString() + add.value.toString());
         }
-        throw new RuntimeException("Invalid type");
-    }
-
-    public JayObject<?> multiply(JayObject<?> mul) {
-        switch (this.type) {
-            case DECIMAL:
-                switch (mul.type) {
-                    case DECIMAL:
-                        return new JayObject<>(Type.DECIMAL,
-                                ((BigDecimal) this.value).multiply((BigDecimal) mul.value));
-                    case STRING:
-                        int times = ((BigDecimal) this.value).intValue();
-                        StringBuilder result = new StringBuilder();
-                        for (int i = 0; i < times; i++) {
-                            result.append((String) mul.value);
-                        }
-                        return new JayObject<>(Type.STRING, result.toString());
-                    default:
-                        throw new RuntimeException("Invalid type for multiplication");
-                }
-            case STRING:
-                switch (mul.type) {
-                    case DECIMAL:
-                        int times = ((BigDecimal) mul.value).intValue();
-                        StringBuilder result = new StringBuilder();
-                        for (int i = 0; i < times; i++) {
-                            result.append((String) this.value);
-                        }
-                        return new JayObject<>(Type.STRING, result.toString());
-                    default:
-                        throw new RuntimeException("Invalid type for multiplication");
-                }
-            default:
-                throw new RuntimeException("Invalid type for multiplication");
-        }
+        throw new RuntimeException("Addition not supported for these types");
     }
 
     public JayObject<?> subtract(JayObject<?> sub) {
@@ -145,17 +152,32 @@ public class JayObject<T> implements JayType {
                 }
                 break;
         }
-        throw new RuntimeException("Invalid type for subtraction");
+        throw new RuntimeException("Subtraction not supported for these types");
     }
 
-    @Override
-    public boolean notEqual(JayObject<?> object) {
-        return !this.equal(object);
+    public JayObject<?> multiply(JayObject<?> mul) {
+        switch (this.type) {
+            case DECIMAL:
+                if (mul.type == Type.DECIMAL) {
+                    return new JayObject<>(Type.DECIMAL, ((BigDecimal) this.value).multiply((BigDecimal) mul.value));
+                } else if (mul.type == Type.STRING) {
+                    int times = ((BigDecimal) this.value).intValue();
+                    return new JayObject<>(Type.STRING, ((String) mul.value).repeat(times));
+                }
+                break;
+            case STRING:
+                if (mul.type == Type.DECIMAL) {
+                    int times = ((BigDecimal) mul.value).intValue();
+                    return new JayObject<>(Type.STRING, ((String) this.value).repeat(times));
+                }
+                break;
+        }
+        throw new RuntimeException("Multiplication not supported for these types");
     }
 
     private void validateType(JayObject<?> object) {
         if (this.type != object.type) {
-            throw new RuntimeException("Invalid type");
+            throw new RuntimeException("Type mismatch");
         }
     }
 
@@ -165,16 +187,21 @@ public class JayObject<T> implements JayType {
             return true;
         if (obj == null || getClass() != obj.getClass())
             return false;
-
         JayObject<?> jayObject = (JayObject<?>) obj;
+        return type == jayObject.type && Objects.equals(value, jayObject.value);
+    }
 
-        if (type != jayObject.type)
-            return false;
-        return Objects.equals(value, jayObject.value);
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, value);
     }
 
     @Override
     public String toString() {
         return value.toString();
+    }
+
+    public enum Type {
+        DECIMAL, STRING, OBJECT
     }
 }
